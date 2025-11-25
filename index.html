@@ -5,86 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ayesha</title>
 
-    
-<link rel="shortcut icon" href="Assests/favicon.png" type="image/png" />
-      
-   
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <!-- Added Tailwind CSS for utility classes, though custom CSS is dominant here -->
-    
-    <!-- Aesthetic fonts for navbar & Arabic support -->
+    <link rel="shortcut icon" href="Assests/favicon.png" type="image/png" />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Amiri:ital@0;1&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css">
-<!-- moved navigation into body (kept anchor texts as requested) -->
-</head>
+    <style>
+      /* --- Base reset --- */
+      * { margin: 0; padding: 0; box-sizing: border-box; font-family: "montserrat", sans-serif; color: #fff; }
+      html, body { height: 100%; width: 100%; }
+      *::selection { background-color: #fff; color: #95c11e; }
+      body::-webkit-scrollbar { display: block; width: 8px; background: #95c11e; }
+      body::-webkit-scrollbar-thumb { background-color: #fff; border-radius: 50px; }
+      body { overflow-x: hidden; background: #000; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
+      /* --- Custom cursor --- */
+      #cursor { height: 20px; width: 20px; background-color: #95c11e; border-radius: 50%; position: fixed; z-index: 999; transition: transform 0.08s linear, background-color 0.12s linear, border 0.12s linear; pointer-events: none; transform: translate(-50%, -50%) scale(1); will-change: transform, left, top; display: block; }
+      #cursor-blur { height: 500px; width: 500px; background-color: rgba(150, 193, 30, 0.2); border-radius: 50%; position: fixed; filter: blur(80px); z-index: 98; transition: transform 0.25s linear, opacity 0.25s linear; pointer-events: none; transform: translate(-50%, -50%); opacity: 1; }
+
+      /* --- AUDIO ICON STYLES --- */
+      .audio-icon { position: fixed; top: 30px; right: 30px; z-index: 1000; background-color: #95c11e; color: #000; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s, transform 0.1s; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+      .audio-icon i { font-size: 18px; color: #000; line-height: 1; }
+      .audio-icon:hover { background-color: #aae033; }
+      .audio-icon:active { transform: scale(0.95); }
+
+      /* --- TOP NAVBAR (NEW) --- */
+      .top-nav { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: min(940px, 94%); z-index: 1100; background: rgba(0,0,0,0.18); backdrop-filter: blur(6px); border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); padding: 8px 14px; pointer-events: auto; }
+      .top-nav .nav-inner { display: flex; gap: 18px; justify-content: center; align-items: center; }
+      .top-nav .nav-link { text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; color: rgba(255,255,255,0.92); padding: 6px 10px; border-radius: 8px; transition: all 180ms ease; letter-spacing: 0.4px; font-size: 15px; }
+      .top-nav .nav-link:hover, .top-nav .nav-link:focus { color: #000; background: linear-gradient(90deg, rgba(149,193,18,0.95), rgba(170,224,51,0.95)); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(149,193,18,0.12); outline: none; }
+
+      /* --- Make navbar mobile-friendly WITHOUT changing HTML structure --- */
+      /* On small screens we keep original anchors but make the nav full-width, touch-sized, and horizontally scrollable */
+      @media (max-width: 880px) {
+        .top-nav { left: 0; transform: none; width: 100%; top: 0; border-radius: 0; padding: 10px 8px; }
+        .top-nav .nav-inner { justify-content: flex-start; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 6px; }
+        .top-nav .nav-inner::-webkit-scrollbar { display: none; }
+        .top-nav .nav-link { flex: 0 0 auto; font-size: 16px; padding: 10px 14px; white-space: nowrap; }
+        /* Add gentle background for easier tapping on top area */
+        body { padding-top: 56px; }
+      }
+
+      /* On very small phones increase hit area more and slightly reduce spacing */
+      @media (max-width: 420px) {
+        .top-nav { padding: 8px 6px; }
+        .top-nav .nav-link { font-size: 15px; padding: 12px 12px; border-radius: 10px; }
+        body { padding-top: 64px; }
+      }
+
+      /* --- Main layout --- */
+      #main { position: relative; background-color: rgba(0,0,0,0.39); }
+
+      /* --- Page 1 --- */
+      #page1 { min-height: 100vh; width: 100%; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; z-index: 10; background-color: rgba(0,0,0,0.39); padding: 6vh 4vw; }
+      #page1 video { height: 100%; width: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: -1; pointer-events: none; }
+
+      /* H1 Container Style */
+      #page1 h1 { font-size: clamp(40px, 8.5vw, 74px); font-weight: 900; position: relative; line-height: 1.02; }
+      .h1-text-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: inline-block; transition: opacity 0.5s; }
+      .h1-stroke-layer { color: #000; -webkit-text-stroke: 1.5px #95c11e; text-align: center; position: relative; top: -3px; left: -3px; z-index: 0; }
+      .h1-main-layer { color: #fff; text-align: center; position: absolute; top: 0; left: 0; z-index: 1; }
+      #page1 h2 { font-size: clamp(14px, 3.2vw, 30px); font-weight: 800; margin-top: 10px; margin-bottom: 20px; }
+      #page1 p { font-size: clamp(12px, 1.2vw, 18px); font-weight: 500; width: min(720px, 90%); }
+
+      /* --- Page 2 / Scroller --- */
+      #page2 { min-height: 100vh; width: 100%; background-color: #000; z-index: 10; padding-bottom: 40px; }
+      #scroller { white-space: nowrap; overflow-x: auto; overflow-y: hidden; position: relative; z-index: 10; padding: 40px 12px; -webkit-overflow-scrolling: touch; }
+      #scroller::-webkit-scrollbar { display: none; }
+      #scroller-in { display: inline-block; white-space: nowrap; }
+      #scroller h4 { display: inline-block; font-size: clamp(24px, 10vw, 120px); font-weight: 900; font-family: gilroy; margin-right: 20px; transition: all linear 0.3s; color: #000; -webkit-text-stroke: 2px #ffffff; vertical-align: middle; }
+      #scroller h4:hover { color: #95c11e; -webkit-text-stroke: 2px #95c11e; }
+
+      /* Page 3 Content */
+      #page3 p { font-family: 'Amiri Quran', serif; font-size: 1.4rem; line-height: 2.2rem; text-align: center; color: #ffffff; }
+      #page3 p { unicode-bidi: isolate; }
+      #page3 p:lang(en), #page3 p *:lang(en) { font-family: 'Cinzel', serif !important; }
+      #page3 { padding: 80px 6vw; width: 100%; display: flex; align-items: center; position: relative; justify-content: center; box-sizing: border-box; }
+      #page3 > p { font-size: clamp(18px, 4.5vw, 35px); font-weight: 700; width: min(900px, 90%); line-height: 1.25; text-align: center; }
+      #page3 img { position: absolute; height: 40px; }
+      #page3 #colon1 { left: 3%; top: 8%; }
+      #page3 #colon2 { bottom: 20%; right: 10%; }
+
+      /* Page 4 */
+      #page4 { height: auto; width: 100%; display: flex; align-items: center; justify-content: center; position: relative; padding: 30px 4vw 80px; }
+
+      /* --- Responsive tweaks --- */
+      @media (max-width: 600px) {
+        #cursor-blur { height: 300px; width: 300px; filter: blur(48px); opacity: 0.9; }
+        #page3 img { height: 32px; }
+        .audio-icon { top: 20px; right: 20px; width: 36px; height: 36px; }
+        .top-nav { top: 8px; padding: 6px 10px; }
+        .top-nav .nav-link { font-size: 14px; padding: 6px 8px; }
+        /* Smaller headings on tight screens */
+        #page1 h1 { font-size: clamp(28px, 10.5vw, 48px); }
+        #page1 h2 { font-size: clamp(12px, 4vw, 20px); }
+        #scroller h4 { font-size: clamp(20px, 14vw, 64px); }
+        body { padding-top: 56px; }
+      }
+
+      /* Extra-small phone adjustments */
+      @media (max-width: 420px) {
+        /* Hide the large cursor blur on tiny screens for performance */
+        #cursor-blur { display: none; }
+        #cursor { height: 18px; width: 18px; }
+        .bubble-container { height: 120px; padding: 4px 4vw 0 4vw; }
+        .bubble { width: 44px; height: 44px; font-size: 14px; bottom: 12px; }
+        .bubble-source { font-size: 2rem; bottom: 12px; }
+        #page1 { padding: 5vh 4vw; }
+        #page1 h1 { font-size: clamp(22px, 12vw, 40px); }
+        #page3 { padding: 40px 4vw; }
+        body { padding-top: 66px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) { #scroller-in { animation: none !important; } }
+
+      /* --- NEW BUBBLE BURST STYLES (tweaked for mobile) --- */
+      .bubble-container { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: 5px 5vw 0 5vw; z-index: 2147483646; pointer-events: none; height: 200px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); opacity: 0; transition: opacity 300ms ease, transform 300ms ease; transform: translateY(10px); transform-origin: center top; will-change: opacity, transform; }
+      .bubble-container.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      .bubble-source { font-family: 'Amiri', serif; font-size: 3.5rem; color: #95c112; position: absolute; bottom: 18px; margin-top: 0; font-weight: 700; text-shadow: 0 0 10px rgba(149,193,18,0.5); transition: text-shadow 220ms ease, transform 220ms ease; pointer-events: auto; }
+      #source-left { left: calc(5vw); }
+      #source-right { right: calc(5vw); }
+      .bubble-container.visible .bubble-source { text-shadow: 0 0 10px rgba(149,193,18,0.6), 0 0 22px rgba(149,193,18,0.35), 0 0 42px rgba(170,224,51,0.12); transform: translateY(-6px); }
+      .bubble { position: absolute; bottom: 20px; width: 60px; height: 60px; background-color: rgba(149,193,18,0); border: 2px solid rgba(255,255,255,0); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; color: #fff; text-align: center; cursor: pointer; opacity: 0; transition: background-color 0.1s, transform 0.1s; animation: fly 2s linear forwards; pointer-events: auto; white-space: nowrap; }
+      .bubble:hover { background-color: rgba(255,255,255,0); color: #000; }
+      @keyframes fly { 0% { transform: translateY(0) scale(0.5); opacity: 0.8; } 50% { opacity: 1; } 100% { transform: translateY(-200px) scale(1.2); opacity: 0; } }
+
+      /* small helper to ensure video plays responsively without heavy repaint on old phones */
+      video { -webkit-transform: translateZ(0); transform: translateZ(0); }
+
+    </style>
+</head>
 <body>
 
-    <!-- TRANSPARENT TOP NAVBAR -->
+    <!-- TRANSPARENT TOP NAVBAR (HTML unchanged) -->
     <nav class="top-nav" role="navigation" aria-label="Main navigation">
       <div class="nav-inner">
         <a class="nav-link" href="contact.html">Contact</a>
         <a class="nav-link" href="timer.html">Timer</a>
-        <a class="nav-link" href="final.html">final</a>
-        <a class="nav-link" href="game.html">game</a>
+        <a class="nav-link" href="final.html">Final</a>
+        <a class="nav-link" href="game.html">Game</a>
       </div>
     </nav>
     <!-- END NAVBAR -->
 
-    <!-- NEW AUDIO TOGGLE ICON -->
-    <div id="audio-toggle" aria-label="Toggle Audio" role="button" tabindex="0" class="audio-icon">
-        <!-- Icon defaults to mute since the video is initialized as muted -->
-        <i class="ri-volume-mute-fill"></i> 
-    </div>
-    
     <div id="cursor" aria-hidden="true"></div>
     <div id="cursor-blur" aria-hidden="true"></div>
 
     <div id="main">
         <div id="page1">
-            <video
-              id="hero-video"
-              autoplay
-              loop
-              muted
-              playsinline
-              src="Assests/hero.mp4"
-            ></video>
-            
-            <!-- MODIFIED H1 STRUCTURE FOR ANIMATION CONTROL -->
+            <video id="hero-video" autoplay loop muted playsinline src="Assests/hero.mp4"></video>
             <h1 id="animated-title">
                 <span id="stroke-text" class="h1-stroke-layer">عائشة سيف قادري</span>
                 <span id="main-text" class="h1-main-layer">عائشة سيف قادري</span>
             </h1>
 
             <h2>في الدنيا والآخرة </h2>
-            <!-- <p>
-                <small>In this world and the hereafter</small>
-            </p> -->
-            
         </div>
 
         <div id="page2">
-
             <div id="scroller" aria-hidden="false">
                 <div id="scroller-in">
-            <h4>Meri Jaan
-You Are The Best Creation Of The Greatest Creater.</h4>
-                    
-                    <!-- <h4>میری جان -
-الله جَلَّ جَلَالُهٌ کی بہترین تخلیق ہیں آپ</h4> -->
+                    <h4>Meri Jaan\nYou Are The Best Creation Of The Greatest Creater.</h4>
                 </div>
                 <div id="scroller-in">
-            <h4>Meri Jaan
-You Are The Best Creation Of The Greatest Creater</h4>
-                    
-                    <!-- <h4>میری جان -
-الله جَلَّ جَلَالُهٌ کی بہترین تخلیق ہیں آپ</h4> -->
-                    
+                    <h4>Meri Jaan\nYou Are The Best Creation Of The Greatest Creater</h4>
                 </div>
             </div>
 
@@ -93,59 +177,163 @@ You Are The Best Creation Of The Greatest Creater</h4>
                 لَقَدْ خَلَقْنَا الْإِنسَانَ فِي أَحْسَنِ تَقْوِيمٍ
                 <br>              یقیناً ہم نے انسان کو بہترین صورت میں پیدا کیا
 
-             <br>Verily, We created human of the best stature
+             <br>Verily, We created human of the best stature <br>
+<br>لا تَمْنَحَنَّ وُدَّكَ مَنْ لا وَفَاءَ لَهُ</br>
+One who is not LOYAL<br> does not deserve your LOVE"<br> Hazrat Ali رَضِيَ اللهُ عَنْهُ
 
- </p>
-              <img
-                id="colon1"
-                src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-left.svg"
-                alt="quote"
-              />
-              <img
-                id="colon2"
-                src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-right.svg"
-                alt="quote"
-              />
-              <!-- <div id="page4">
-                <h1>یقیناً ہم نے انسان کو بہترین صورت میں پیدا کیا
-
-                </h1>
-              </div> -->
-            </div> 
-
+ </br>
+              </p>
+              <img id="colon1" src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-left.svg" alt="quote" />
+              <img id="colon2" src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-right.svg" alt="quote" />
+            </div>
         </div>
-        <!-- New section added at the very end to meet the user's request: bubble burst system -->
-   
     </div>
 
-    
-     <div id="bubble-container" class="bubble-container" aria-hidden="true">
-        <!-- Left word: سيف -->
+    <div id="bubble-container" class="bubble-container" aria-hidden="true">
         <div id="source-left" class="bubble-source">عائشة</div>
-        
-        <!-- Right word: سيف -->
         <div id="source-right" class="bubble-source">سيف</div>
     </div>
-    <!-- End of new bubble system HTML -->
 
-    
+    <!-- External libs (kept but loaded from CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/ScrollTrigger.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+      // --- Cursor logic (desktop + touch) ---
+      (function () {
+        var crsr = document.getElementById('cursor');
+        var blur = document.getElementById('cursor-blur');
+
+        function setPos(x, y) { crsr.style.left = x + 'px'; crsr.style.top = y + 'px'; blur.style.left = x + 'px'; blur.style.top = y + 'px'; }
+        function onMouseMove(e) { setPos(e.clientX, e.clientY); }
+        document.addEventListener('mousemove', onMouseMove);
+
+        var touchTimeout;
+        function onTouchStart(e) {
+          if (!e.touches || e.touches.length === 0) return;
+          var t = e.touches[0]; setPos(t.clientX, t.clientY); crsr.style.display = 'block'; blur.style.display = 'block'; crsr.style.transform = 'translate(-50%, -50%) scale(1.4)'; clearTimeout(touchTimeout);
+        }
+        function onTouchMove(e) { if (!e.touches || e.touches.length === 0) return; var t = e.touches[0]; setPos(t.clientX, t.clientY); }
+        function onTouchEnd(e) { clearTimeout(touchTimeout); touchTimeout = setTimeout(function () { crsr.style.transform = 'translate(-50%, -50%) scale(1)'; crsr.style.display = 'none'; blur.style.display = 'none'; }, 220); }
+
+        document.addEventListener('touchstart', onTouchStart, { passive: true });
+        document.addEventListener('touchmove', onTouchMove, { passive: true });
+        document.addEventListener('touchend', onTouchEnd);
+
+        function scaleCursorBig() { crsr.style.transform = 'translate(-50%, -50%) scale(3)'; crsr.style.border = '1px solid #fff'; crsr.style.backgroundColor = 'transparent'; }
+        function resetCursor() { crsr.style.transform = 'translate(-50%, -50%) scale(1)'; crsr.style.border = '0px solid #95C11E'; crsr.style.backgroundColor = '#95C11E'; }
+
+        var interactiveItems = document.querySelectorAll('#scroller h4, #audio-toggle');
+        interactiveItems.forEach(function (elem) { elem.addEventListener('mouseenter', scaleCursorBig); elem.addEventListener('mouseleave', resetCursor); elem.addEventListener('touchstart', function () { scaleCursorBig(); setTimeout(resetCursor, 280); }, { passive: true }); });
+
+        var arrow = document.getElementById('arrow');
+        if (arrow) { arrow.addEventListener('click', function () { window.scrollTo({ top: window.innerHeight, behavior: 'smooth' }); }); arrow.addEventListener('touchstart', function () { crsr.style.transform = 'translate(-50%, -50%) scale(1.8)'; setTimeout(function () { crsr.style.transform = 'translate(-50%, -50%) scale(1)'; }, 220); window.scrollTo({ top: window.innerHeight, behavior: 'smooth' }); }, { passive: true }); }
+
+        if ('ontouchstart' in window) { crsr.style.display = 'none'; blur.style.display = 'none'; }
+      })();
+
+      // --- Audio Toggle Logic ---
+      (function () {
+          const video = document.getElementById('hero-video'); 
+          const audioToggle = document.getElementById('audio-toggle');
+          const icon = audioToggle ? audioToggle.querySelector('i') : null;
+
+          if (!video || !audioToggle || !icon) return;
+
+          audioToggle.addEventListener('click', toggleAudio);
+          audioToggle.addEventListener('keypress', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAudio(); } });
+
+          function toggleAudio() {
+              if (video.muted) { video.muted = false; video.play().catch(e => { console.warn("Play failed after unmute, user interaction might be required.", e); }); icon.className = 'ri-volume-up-fill'; audioToggle.setAttribute('aria-label', 'Mute Audio'); } else { video.muted = true; icon.className = 'ri-volume-mute-fill'; audioToggle.setAttribute('aria-label', 'Unmute Audio'); }
+          }
+      })();
+
+      // --- TEXT CYCLING LOGIC ---
+      (function () {
+          if (typeof gsap === 'undefined') return;
+
+          const strokeText = document.getElementById('stroke-text');
+          const mainText = document.getElementById('main-text');
+          const container = document.getElementById('animated-title');
+
+          if (!strokeText || !mainText || !container) return;
+
+          const texts = [ "عائشة سيف قادري", "عائشة", "سيف" ];
+          let currentIndex = 0; const duration = 3000;
+
+          function updateText(newText) { strokeText.textContent = newText; mainText.textContent = newText; }
+
+          function cycleText() {
+              gsap.to([strokeText, mainText], { opacity: 0, duration: 0.5, ease: "power1.inOut", onComplete: () => { currentIndex = (currentIndex + 1) % texts.length; const nextText = texts[currentIndex]; updateText(nextText); gsap.to([strokeText, mainText], { opacity: 1, duration: 0.5, ease: "power1.inOut", delay: 0.1 }); } });
+          }
+
+          setInterval(cycleText, duration);
+      })();
+
+      // --- GSAP scroll triggers (guarded for missing elements) ---
+      try {
+        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+          gsap.registerPlugin(ScrollTrigger);
+          if (document.querySelector('#main')) { gsap.to('#main', { backgroundColor: '#000', scrollTrigger: { trigger: '#main', scroller: 'body', start: 'top -25%', end: 'top -70%', scrub: 2, }, }); }
+          if (document.querySelector('#page3 #colon1')) { gsap.from('#page3 #colon1', { y: -70, x: -70, scrollTrigger: { trigger: '#page3', scroller: 'body', start: 'top 55%', end: 'top 45%', scrub: 4, }, }); }
+          if (document.querySelector('#page3 #colon2')) { gsap.from('#page3 #colon2', { y: 70, x: 70, scrollTrigger: { trigger: '#page3', scroller: 'body', start: 'top 55%', end: 'top 45%', scrub: 4, }, }); }
+          if (document.querySelector('#page4 h1')) { gsap.from('#page4 h1', { y: 50, scrollTrigger: { trigger: '#page4 h1', scroller: 'body', start: 'top 75%', end: 'top 70%', scrub: 3, }, }); }
+        }
+      } catch (err) { console.warn('GSAP/ScrollTrigger issue:', err); }
+
+      // --- Optional: auto-scroll for large screens only (keeps original animated scroller feel) ---
+      (function () {
+        var scroller = document.getElementById('scroller');
+        if (scroller && window.innerWidth > 0) {
+          var scrollers = document.querySelectorAll('#scroller-in');
+          scrollers.forEach(function (el, idx) { el.style.animationName = 'scroll'; el.style.animationDuration = (idx === 0 ? '40s' : '40s'); el.style.animationTimingFunction = 'linear'; el.style.animationIterationCount = 'infinite'; });
+          var style = document.createElement('style'); style.innerHTML = '@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }'; document.head.appendChild(style);
+        }
+      })();
+
+      /* -------------------------
+         BUBBLE SYSTEM (modified to appear only at page end)
+       ------------------------- */
+      function createBubble(sourceElementId, bubbleText) {
+          const source = document.getElementById(sourceElementId);
+          const container = document.getElementById('bubble-container');
+          if (!source || !container) return;
+
+          const bubble = document.createElement('div');
+          bubble.className = 'bubble';
+          bubble.innerText = bubbleText;
+
+          const sourceRect = source.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const initialX = (sourceRect.left + (sourceRect.width / 2)) - containerRect.left;
+          bubble.style.left = `${initialX - 30}px`;
+
+          const burstBubble = (b) => { b.style.transition = 'opacity 0.1s, transform 0.1s'; b.style.opacity = '0'; b.style.transform = 'scale(1.5)'; setTimeout(() => b.remove(), 100); };
+
+          bubble.addEventListener('click', function() { burstBubble(bubble); clearTimeout(bubble.autoBurstTimer); });
+          container.appendChild(bubble);
+
+          bubble.autoBurstTimer = setTimeout(() => { if (document.body.contains(bubble)) { burstBubble(bubble); } }, 2000);
+        }
+
+        function generateRandomBubble() { const sourceId = Math.random() < 0.5 ? 'source-left' : 'source-right'; createBubble(sourceId, 'عائشة'); }
+
+      (function () {
+          const container = document.getElementById('bubble-container'); if (!container) return;
+          container.style.position = 'fixed'; container.style.bottom = '0'; container.style.left = '0'; container.style.right = '0';
+
+          let bubbleInterval = null;
+          function isAtPageBottom(tolerance = 10) { return (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - tolerance); }
+          function startBubbles() { if (bubbleInterval) return; container.classList.add('visible'); container.setAttribute('aria-hidden', 'false'); generateRandomBubble(); bubbleInterval = setInterval(generateRandomBubble, 800); }
+          function stopBubbles() { if (!bubbleInterval) return; clearInterval(bubbleInterval); bubbleInterval = null; container.classList.remove('visible'); container.setAttribute('aria-hidden', 'true'); }
+
+          function onScrollCheck() { if (isAtPageBottom()) { startBubbles(); } else { stopBubbles(); } }
+          window.addEventListener('scroll', onScrollCheck, { passive: true }); window.addEventListener('resize', onScrollCheck);
+          window.addEventListener('load', function () { setTimeout(onScrollCheck, 120); });
+
+      })();
+
     </script>
-    
-    <!-- NEW BUBBLE BURST SYSTEM SCRIPT (Added to the very end) -->
-    
-<script src="https://cdn.tailwindcss.com"></script>
-<script
-      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js"
-      xintegrity="sha512-qF6akR/fsZAB4Co1QDDnUXWnaQseLGXoniuSuSlPQK6+aWhlMZcHzkasCSlnWoe+TJuudlka1/IQ01Dnhgq95g=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-<script
-      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/ScrollTrigger.min.js"
-      xintegrity="sha512-IHDCHrefnBT3vOCsvdkMvJF/MCPz/nBauQLzJkupa4Gn4tYg5a6VGyzIrjo6QAUy3We5HFOZUlkUpP0dkgE60A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-<script src="scripts.js"></script>
 </body>
 </html>
