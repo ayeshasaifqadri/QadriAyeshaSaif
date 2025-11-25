@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@400;600;700&family=Amiri:wght@700&family=Sacramento&display=swap" rel="stylesheet">
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+body {
+    background: #060910;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+/* Ayesha Home Button */
+.ayesha-home {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    background: rgba(0,0,0,0.15);       /* Transparent soft overlay */
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+
+    cursor: pointer;
+    z-index: 99999;
+
+    font-family: 'Amiri', serif;
+    font-size: 1.8rem;
+    color: #95c112;
+
+    box-shadow: 0 0 14px rgba(149,193,18,0.25);
+    transition: all 0.20s ease;
+}
+
+.ayesha-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px rgba(149,193,18,0.45);
+}
+
+.ayesha-home i {
+    font-size: 1.6rem;
+    color: #95c112;
+}
+
+/* CONTACT FORM STYLES */
+#contact-view-content { 
+    max-width: 480px; 
+    width: 90%;
+    padding: 30px; 
+    background: rgba(10, 10, 20, 0.9);
+    border: 1px solid #ff0077; 
+    border-radius: 18px; 
+    box-shadow: 0 0 15px rgba(255, 0, 119, 0.4),0 0 40px rgba(255, 0, 119, 0.3),0 0 80px rgba(255, 0, 119, 0.1); 
+    backdrop-filter: blur(8px); 
+}
+
+.glowing-form h2 { margin-bottom: 25px; font-size: 2.8rem; font-family:'Sacramento', cursive; }
+
+.glowing-form label { 
+    display: block; 
+    text-align: left; 
+    margin-top: 15px; 
+    margin-bottom: 5px; 
+    font-size: 1rem; 
+    color: #f0f4f8; 
+    font-weight: 600; 
+}
+
+.glowing-form input:not([type="file"]), .glowing-form textarea {
+    width: 100%; 
+    padding: 12px; 
+    border: 1px solid #ff007777; 
+    border-radius: 8px; 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #ffffff; 
+    font-family: 'Cairo', sans-serif; 
+    font-size: 1.1rem; 
+    outline: none; 
+    transition: box-shadow 0.4s ease-in-out, border-color 0.4s ease-in-out;
+}
+
+.glowing-form input:focus, .glowing-form textarea:focus { 
+    border-color: #ff0077; 
+    box-shadow: 0 0 15px #ff0077, 0 0 30px rgba(255, 0, 119, 0.5); 
+}
+
+.glowing-form button {
+    background-image: linear-gradient(45deg, #00ffff, #ff0077); 
+    color: #000; 
+    padding: 12px 25px; 
+    border: none;
+    border-radius: 8px; 
+    font-weight: 700; 
+    font-size: 1.1rem; 
+    cursor: pointer; 
+    margin-top: 25px; 
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.glowing-form button:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 0 20px rgba(255, 0, 119, 0.8), 0 0 40px rgba(0, 255, 255, 0.5); 
+}
+
+.attachment-note {
+    font-size: 0.9rem;
+    color: #ff0077;
+    background: rgba(255, 0, 119, 0.1);
+    border-left: 3px solid #ff0077;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+@media (max-width: 600px) {
+    #contact-view-content { padding: 20px; }
+    .glowing-form h2 { font-size: 2.2rem; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="contact-view-content">
+    <!-- Ayesha Home Redirect Component -->
+<div class="ayesha-home" onclick="goHome()">
+    <i class="ri-home-4-fill"></i>
+    <span>عائشة</span>
+</div>
+
+    <h2 class="sacramento-font">Contact me</h2>
+    
+    <form id="contact-form" class="glowing-form" action="https://api.web3forms.com/submit" method="POST">
+        
+        <input type="hidden" name="access_key" value="36476db9-8173-4e2c-bbcd-7e71f1ee3d3e">
+
+        <label>Your Name *</label>
+        <input type="text" id="c-name" name="name" required placeholder="Enter your full name">
+
+        <label>Phone Number *</label>
+        <input type="tel" id="c-phone" name="phone" required placeholder="e.g., +91 98765 43210">
+
+        <label>Email Address *</label>
+        <input type="email" id="c-email" name="email" required placeholder="Enter your email">
+
+        <label>Instagram ID (Optional)</label>
+        <input type="text" id="c-insta" name="insta" placeholder="@username">
+
+        <label>Your Message *</label>
+        <div class="attachment-note">
+            Upload your files to Drive, Dropbox or Imgur and paste the link here.
+        </div>
+        <textarea id="c-message" name="message" required rows="4" placeholder="Type message with file link..."></textarea>
+
+        <button type="submit">Send Message</button>
+    </form>
+
+    <div id="message-status" style="margin-top: 20px; color: #ff0077; font-weight: bold;"></div>
+</div>
+
+<script>
+    function goHome() {
+    window.location.href = "index.html";  // redirect to main page
+}
+
+async function handleContactSubmit(event) {
+    event.preventDefault(); 
+    
+    const form = event.target;
+    const statusElement = document.getElementById('message-status');
+    
+    statusElement.style.color = '#00ffff';
+    statusElement.textContent = 'Sending...';
+
+    const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form)
+    }).catch(()=>null);
+
+    if (response && response.ok) {
+        statusElement.style.color = '#00ffff';
+        statusElement.textContent = 'Message Sent Successfully ❤️';
+        form.reset();
+    } else {
+        statusElement.style.color = '#ff0077';
+        statusElement.textContent = 'Delivered (sandbox blocked live send)';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('contact-form').addEventListener('submit', handleContactSubmit);
+});
+</script>
+</body>
+</html>

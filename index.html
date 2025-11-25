@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ayesha</title>
+
+    
+<link rel="shortcut icon" href="Assests/favicon.png" type="image/png" />
+      
+   
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <!-- Added Tailwind CSS for utility classes, though custom CSS is dominant here -->
+    
+    <!-- Aesthetic fonts for navbar & Arabic support -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Amiri:ital@0;1&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+<!-- moved navigation into body (kept anchor texts as requested) -->
+</head>
+
+<body>
+
+    <!-- TRANSPARENT TOP NAVBAR -->
+    <nav class="top-nav" role="navigation" aria-label="Main navigation">
+      <div class="nav-inner">
+        <a class="nav-link" href="contact.html">Contact</a>
+        <a class="nav-link" href="timer.html">Timer</a>
+        <a class="nav-link" href="final.html">final</a>
+        <a class="nav-link" href="game.html">game</a>
+      </div>
+    </nav>
+    <!-- END NAVBAR -->
+
+    <!-- NEW AUDIO TOGGLE ICON -->
+    <div id="audio-toggle" aria-label="Toggle Audio" role="button" tabindex="0" class="audio-icon">
+        <!-- Icon defaults to mute since the video is initialized as muted -->
+        <i class="ri-volume-mute-fill"></i> 
+    </div>
+    
+    <div id="cursor" aria-hidden="true"></div>
+    <div id="cursor-blur" aria-hidden="true"></div>
+
+    <div id="main">
+        <div id="page1">
+            <video
+              id="hero-video"
+              autoplay
+              loop
+              muted
+              playsinline
+              src="Assests/hero.mp4"
+            ></video>
+            
+            <!-- MODIFIED H1 STRUCTURE FOR ANIMATION CONTROL -->
+            <h1 id="animated-title">
+                <span id="stroke-text" class="h1-stroke-layer">عائشة سيف قادري</span>
+                <span id="main-text" class="h1-main-layer">عائشة سيف قادري</span>
+            </h1>
+
+            <h2>في الدنيا والآخرة </h2>
+            <!-- <p>
+                <small>In this world and the hereafter</small>
+            </p> -->
+            
+        </div>
+
+        <div id="page2">
+
+            <div id="scroller" aria-hidden="false">
+                <div id="scroller-in">
+            <h4>Meri Jaan
+You Are The Best Creation Of The Greatest Creater.</h4>
+                    
+                    <!-- <h4>میری جان -
+الله جَلَّ جَلَالُهٌ کی بہترین تخلیق ہیں آپ</h4> -->
+                </div>
+                <div id="scroller-in">
+            <h4>Meri Jaan
+You Are The Best Creation Of The Greatest Creater</h4>
+                    
+                    <!-- <h4>میری جان -
+الله جَلَّ جَلَالُهٌ کی بہترین تخلیق ہیں آپ</h4> -->
+                    
+                </div>
+            </div>
+
+            <div id="page3">
+              <p>
+                لَقَدْ خَلَقْنَا الْإِنسَانَ فِي أَحْسَنِ تَقْوِيمٍ
+                <br>              یقیناً ہم نے انسان کو بہترین صورت میں پیدا کیا
+
+             <br>Verily, We created human of the best stature
+
+ </p>
+              <img
+                id="colon1"
+                src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-left.svg"
+                alt="quote"
+              />
+              <img
+                id="colon2"
+                src="https://eiwgew27fhz.exactdn.com/wp-content/themes/puttosaurus/img/quote-right.svg"
+                alt="quote"
+              />
+              <!-- <div id="page4">
+                <h1>یقیناً ہم نے انسان کو بہترین صورت میں پیدا کیا
+
+                </h1>
+              </div> -->
+            </div> 
+
+        </div>
+        <!-- New section added at the very end to meet the user's request: bubble burst system -->
+   
+    </div>
+
+    
+     <div id="bubble-container" class="bubble-container" aria-hidden="true">
+        <!-- Left word: سيف -->
+        <div id="source-left" class="bubble-source">عائشة</div>
+        
+        <!-- Right word: سيف -->
+        <div id="source-right" class="bubble-source">سيف</div>
+    </div>
+    <!-- End of new bubble system HTML -->
+
+    
+    </script>
+    
+    <!-- NEW BUBBLE BURST SYSTEM SCRIPT (Added to the very end) -->
+    
+<script src="https://cdn.tailwindcss.com"></script>
+<script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js"
+      xintegrity="sha512-qF6akR/fsZAB4Co1QDDnUXWnaQseLGXoniuSuSlPQK6+aWhlMZcHzkasCSlnWoe+TJuudlka1/IQ01Dnhgq95g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+<script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/ScrollTrigger.min.js"
+      xintegrity="sha512-IHDCHrefnBT3vOCsvdkMvJF/MCPz/nBauQLzJkupa4Gn4tYg5a6VGyzIrjo6QAUy3We5HFOZUlkUpP0dkgE60A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+<script src="scripts.js"></script>
+</body>
+</html>

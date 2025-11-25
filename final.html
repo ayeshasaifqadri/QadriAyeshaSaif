@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Typographic Sequence — Page 1</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+
+<style>
+
+  :root{
+    --bg:#ffffff;
+    --arabic-color:#000000;
+    --english-color:#111827;
+    --accent:#d50000;
+    --arrow-size:56px;
+    --arabic-base-size:6.2rem; /* base size for arabic */
+    --arabic-min-size:2.2rem;  /* minimum size when auto-scaling */
+    --count-size:48px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:'Playfair Display', serif;
+    background:var(--bg);
+    color:var(--english-color);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+/* Ayesha Home Button */
+.ayesha-home {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    background: rgba(0, 0, 0, 0);       /* Transparent soft overlay */
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+
+    cursor: pointer;
+    z-index: 99999;
+
+    font-family: 'Amiri', serif;
+    font-size: 1.8rem;
+    color: #95c112;
+
+    box-shadow: 0 0 14px rgba(149,193,18,0.25);
+    transition: all 0.20s ease;
+}
+
+.ayesha-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px rgba(149, 193, 18, 0);
+}
+
+.ayesha-home i {
+    font-size: 1.6rem;
+    color: #95c112;
+}
+
+
+  .stage{
+    width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  }
+
+  .bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .9s ease, transform .9s ease;will-change:opacity,transform;transform:scale(1.02);z-index:0;pointer-events:none;}
+  .bg-layer.active{opacity:1;transform:none;}
+
+  .bg-video{width:100%;height:100%;object-fit:cover;display:block;}
+
+  .card{
+    max-width:900px;padding:40px 28px;text-align:center;transition:transform .9s cubic-bezier(.2,.9,.3,1),opacity .9s ease,background .36s ease,backdrop-filter .36s ease;backface-visibility:hidden;
+    position:relative;z-index:2;background: rgba(255,255,255,0.55);backdrop-filter: blur(6px);border-radius:12px;color:var(--english-color);
+  }
+
+  .card.clear-bg{ background: rgba(255,255,255,0.12); backdrop-filter:none; text-shadow:0 1px 0 rgba(255,255,255,0.02); }
+
+  .line{ opacity:0; transform:translateY(12px); transition:opacity .9s ease,transform .9s cubic-bezier(.2,.9,.3,1); }
+  .line.show{ opacity:1; transform:translateY(0); }
+
+  /* Arabic styling */
+  .arabic{
+    font-family:'Amiri', serif;
+    font-size:var(--arabic-base-size);
+    line-height:1;letter-spacing:0.02em;color:var(--arabic-color);
+    margin:0 0 18px 0;text-align:center;direction:rtl;word-break:keep-all;
+  }
+  .arabic.single-line{ white-space:nowrap; overflow:visible; display:inline-block; max-width:100%; }
+  .arabic.small-lines{ font-size:3.2rem; text-align:center; display:block; white-space:normal; }
+
+  .english{ font-size:1.25rem;color:var(--english-color);margin-top:20px;opacity:.95 }
+  .muted{opacity:.7;font-size:0.98rem}
+
+  .fade-out{opacity:0;transform:scale(.98) translateY(6px)}
+  .fade-in{opacity:1;transform:none}
+
+  .sound-btn{ position:fixed; right:22px; bottom:22px; background:transparent; border:0; padding:10px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,0.08); cursor:pointer; display:flex; align-items:center; gap:8px; opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .36s ease,transform .36s ease; color:#fff; z-index:5; }
+  .sound-btn.show{ opacity:1; pointer-events:auto; transform:none; background:rgba(255,255,255,0.9); border:1px solid rgba(0,0,0,0.06) }
+  .sound-icon{ width:22px;height:22px;display:inline-block }
+
+  .next-arrow{ position:fixed; right:18px; top:50%; transform:translateY(-50%); width:var(--arrow-size); height:var(--arrow-size); display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:0; cursor:pointer; z-index:5; transition:transform .18s ease,opacity .18s ease; opacity:.95; pointer-events:auto; }
+  .next-arrow:hover{ transform:translateY(-50%) scale(1.06); }
+  .next-arrow svg{ width:28px; height:28px; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.2)); }
+  @media (max-width:480px){ :root{--arrow-size:46px} .next-arrow{ right:12px } }
+
+  /* countdown timer in top-right */
+  .countdown{
+    position:fixed;
+    right:22px;
+    top:18px;
+    width:var(--count-size);
+    height:var(--count-size);
+    border-radius:999px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    z-index:6;
+    pointer-events:none;
+    font-family: 'Playfair Display', serif;
+    box-shadow:0 6px 18px rgba(0,0,0,0.22);
+    transition:opacity .2s ease, transform .18s ease;
+  }
+  .countdown.hidden{ opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; }
+  .countdown .sec{ font-size:1.05rem; line-height:1; }
+
+  @media (max-width:480px){ .countdown{ width:40px;height:40px; font-size:0.95rem } .countdown .sec{ font-size:0.95rem } }
+
+  @media (max-width:480px){ .card{ padding:22px; border-radius:8px } .english{ font-size:1rem } }
+</style>
+</head>
+<body>
+   <!-- Ayesha Home Redirect Component -->
+<div class="ayesha-home" onclick="goHome()">
+    <i class="ri-home-4-fill"></i>
+    <span>عائشة</span>
+</div>
+
+<div class="stage" role="main" aria-live="polite">
+  <div id="bg-0" class="bg-layer" aria-hidden="true">
+    <video id="bg-video-0" class="bg-video" src="video1.mp4" muted playsinline loop preload="auto"></video>
+  </div>
+
+  <div id="bg-1" class="bg-layer" aria-hidden="true">
+    <video id="bg-video-1" class="bg-video" src="video2.mp4" muted playsinline loop preload="auto"></video>
+  </div>
+
+<div id="bg-2" class="bg-layer" aria-hidden="true">
+  <img src="Assests/image3.png" alt="" style="width:auto; height:90vh; max-width:90%; object-fit:contain; display:block; margin:0 auto;"/>
+</div>
+  <div class="card" id="card" aria-hidden="false">
+    <div id="text-slot"></div>
+  </div>
+
+  <div id="countdown" class="countdown" aria-hidden="false"><span class="sec">6</span></div>
+
+  <button id="nextBtn" class="next-arrow" aria-label="Next" title="Next (or wait auto)">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M8 5l7 7-7 7" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <button id="soundBtn" class="sound-btn" aria-hidden="true" title="Play sound">
+    <svg class="sound-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M3 10v4h4l5 4V6L7 10H3z" fill="#111"/>
+      <path d="M16.5 8.5a4.5 4.5 0 010 7" stroke="#d50000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span id="soundLabel" class="muted">Play sound</span>
+  </button>
+
+  <audio id="slideAudio" preload="auto"></audio>
+  <audio id="hairat" src="Assests/hairat.mp3" preload="auto"></audio>
+</div>
+
+<script>
+
+function goHome() {
+    window.location.href = "index.html";  // redirect to main page
+}
+
+
+/* content */
+const pieces = [
+  {
+    type:'both',
+    arabic:`كُلُّ نَفْسٍ ذَآئِقَةُ الْمَوْتِ`,
+    english:`<br>Every soul shall taste <b>DEATH</b>.`,
+    audio: 'audio1.mp3'
+  },
+  {
+    type:'arabic-multi',
+    arabic:`كُلُّ مَنْ عَلَيْهَا فَانٍ<br>وَيَبْقَىٰ وَجْهُ رَبِّكَ ذُو الْجَلَالِ وَالْإِكْرَامِ<small></small>`,
+    english:`فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ`,
+    audio: 'audio2.mp3'
+  },
+  {
+    type:'both',
+    arabic:`Tum mujhse <br>Roz-e-Qayamat me milna`,
+    english:`Tumse mera <b>Hisab Baki hai</b>`,
+    highlight:{word:'Roz-e-Qayamat', color:'var(--accent)'}
+  }
+];
+
+const AUTO_INTERVAL = 6000; // 6s
+const bgCount = 3;
+const slot = document.getElementById('text-slot');
+const bgLayers = [];
+for(let i=0;i<bgCount;i++) bgLayers.push(document.getElementById(`bg-${i}`));
+const bgVideos = [ document.getElementById('bg-video-0'), document.getElementById('bg-video-1'), null ];
+
+const nextBtn = document.getElementById('nextBtn');
+const soundBtn = document.getElementById('soundBtn');
+const hairat = document.getElementById('hairat');
+const slideAudio = document.getElementById('slideAudio');
+const card = document.getElementById('card');
+const countdownEl = document.getElementById('countdown');
+const countdownSecEl = countdownEl.querySelector('.sec');
+
+let idx = 0;
+let autoTimeoutID = null;
+let countdownIntervalID = null;
+let countdownRemaining = Math.ceil(AUTO_INTERVAL/1000);
+
+function activateBackground(i){
+  bgLayers.forEach((el, j) => {
+    if(!el) return;
+    if(j === i){ el.classList.add('active'); el.setAttribute('aria-hidden','false'); } 
+    else { el.classList.remove('active'); el.setAttribute('aria-hidden','true'); }
+  });
+
+  bgVideos.forEach((v, j) => {
+    if(!v) return;
+    try{
+      if(j === i){ v.currentTime = 0; const p = v.play(); if(p && p.catch) p.catch(()=>{}); } 
+      else v.pause();
+    }catch(e){}
+  });
+}
+
+/* fit an element to one line by reducing font-size until it fits width or min reached */
+function fitOneLine(el){
+  const style = window.getComputedStyle(el);
+  let fs = parseFloat(style.fontSize);
+  const minPx = parseFloat(convertRemToPx(getComputedStyle(document.documentElement).getPropertyValue('--arabic-min-size') || '2.2rem') || 22);
+  el.style.whiteSpace = 'nowrap';
+  el.style.display = 'inline-block';
+  const containerWidth = card.clientWidth - 48;
+  while(el.scrollWidth > containerWidth && fs > minPx){
+    fs = Math.max(minPx, fs - 1);
+    el.style.fontSize = fs + 'px';
+    if(fs <= minPx) break;
+  }
+}
+
+function convertRemToPx(remString){
+  if(!remString) return null;
+  remString = remString.trim();
+  if(remString.endsWith('px')) return parseFloat(remString);
+  if(remString.endsWith('rem')) {
+    const val = parseFloat(remString);
+    return val * parseFloat(getComputedStyle(document.documentElement).fontSize || 16);
+  }
+  return parseFloat(remString);
+}
+
+function renderPiece(i){
+  const p = pieces[i];
+  activateBackground(i);
+
+  if(i === pieces.length - 1) card.classList.add('clear-bg'); else card.classList.remove('clear-bg');
+
+  slot.innerHTML = '';
+  const arab = document.createElement('div');
+  arab.className = 'arabic line';
+
+  if(p.type === 'arabic-multi'){
+    arab.classList.add('small-lines');
+    arab.innerHTML = p.arabic;
+    arab.style.direction = 'rtl';
+    arab.style.whiteSpace = 'normal';
+    arab.style.display = 'block';
+  } else {
+    let arabText = p.arabic;
+    if(p.highlight && p.highlight.word){
+      const re = new RegExp(p.highlight.word.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&'),'g');
+      arabText = arabText.replace(re, `<span style="color:${p.highlight.color}">${p.highlight.word}</span>`);
+    }
+    arab.innerHTML = arabText;
+    arab.style.direction = 'rtl';
+  }
+
+  const eng = document.createElement('div');
+  eng.className = 'english line';
+  eng.innerHTML = p.english || '';
+
+  slot.appendChild(arab);
+  if(p.english) slot.appendChild(eng);
+
+  void arab.offsetWidth;
+  setTimeout(()=>{
+    if(i === 0){
+      arab.classList.add('single-line');
+      const baseRem = getComputedStyle(document.documentElement).getPropertyValue('--arabic-base-size') || '6.2rem';
+      arab.style.fontSize = baseRem.trim();
+      requestAnimationFrame(()=>fitOneLine(arab));
+      // re-fit on resize
+      window.addEventListener('resize', () => {
+        arab.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--arabic-base-size') || '6.2rem';
+        fitOneLine(arab);
+      });
+    } else {
+      arab.classList.remove('single-line');
+      arab.style.whiteSpace = '';
+      arab.style.fontSize = '';
+    }
+
+    arab.classList.add('show');
+    if(p.english) eng.classList.add('show');
+  },50);
+
+  // autoplay per-slide audio for slides 0 and 1 if available
+  try{ stopSlideAudio(); }catch(e){}
+  if(p.audio && i !== pieces.length - 1){
+    slideAudio.src = p.audio;
+    slideAudio.currentTime = 0;
+    const playPromise = slideAudio.play();
+    if(playPromise && playPromise.catch) playPromise.catch(()=>{ /* autoplay may be blocked */ });
+  }
+
+  // arrow visible on all slides
+  nextBtn.style.display = 'flex';
+
+  // final slide shows sound control and stops auto (handled elsewhere)
+  if(i === pieces.length - 1){
+    soundBtn.classList.add('show');
+    soundBtn.setAttribute('aria-hidden','false');
+    hideCountdown(); // hide countdown at final
+  } else {
+    soundBtn.classList.remove('show');
+    soundBtn.setAttribute('aria-hidden','true');
+    showCountdown(); // ensure countdown visible
+  }
+}
+
+/* slide audio helpers */
+function stopSlideAudio(){ try{ if(!slideAudio.paused) slideAudio.pause(); }catch(e){} }
+
+/* Auto scheduling using single timeout + per-second countdown */
+function startAuto(){
+  stopAuto();
+  if(idx >= pieces.length - 1) return; // don't start if on final
+  countdownRemaining = Math.ceil(AUTO_INTERVAL/1000);
+  updateCountdownUI(countdownRemaining);
+  // Start per-second countdown
+  countdownIntervalID = setInterval(()=>{
+    countdownRemaining = Math.max(0, countdownRemaining - 1);
+    updateCountdownUI(countdownRemaining);
+    if(countdownRemaining <= 0){
+      // Let the timeout handler perform the transition; ensure sync by clearing interval
+      clearInterval(countdownIntervalID);
+      countdownIntervalID = null;
+    }
+  }, 1000);
+
+  autoTimeoutID = setTimeout(()=>{
+    // transition to next slide (if not final)
+    if(idx < pieces.length - 1){
+      goTo(idx + 1);
+    } else {
+      stopAuto();
+    }
+  }, AUTO_INTERVAL);
+}
+
+function stopAuto(){
+  if(autoTimeoutID){ clearTimeout(autoTimeoutID); autoTimeoutID = null; }
+  if(countdownIntervalID){ clearInterval(countdownIntervalID); countdownIntervalID = null; }
+}
+
+function resetAuto(){
+  stopAuto();
+  // restart only if not on final slide
+  if(idx < pieces.length - 1) startAuto();
+}
+
+function updateCountdownUI(sec){
+  if(idx === pieces.length - 1){
+    countdownEl.classList.add('hidden');
+    countdownEl.setAttribute('aria-hidden','true');
+    return;
+  }
+  countdownEl.classList.remove('hidden');
+  countdownEl.setAttribute('aria-hidden','false');
+  countdownSecEl.textContent = String(sec);
+}
+
+function hideCountdown(){
+  countdownEl.classList.add('hidden');
+  countdownEl.setAttribute('aria-hidden','true');
+}
+function showCountdown(){
+  countdownEl.classList.remove('hidden');
+  countdownEl.setAttribute('aria-hidden','false');
+}
+
+/* slide changing */
+function goTo(index){
+  // fade out current lines
+  const lines = slot.querySelectorAll('.line');
+  lines.forEach(l=>{ l.classList.remove('show'); l.classList.add('fade-out'); });
+  setTimeout(()=>{
+    lines.forEach(l=>l.remove());
+    idx = Math.min(index, pieces.length - 1);
+    renderPiece(idx);
+    if(idx === pieces.length - 1){
+      stopAuto();
+      stopSlideAudio();
+      try{ hairat.pause(); }catch(e){}
+    } else {
+      resetAuto();
+    }
+  },900);
+}
+
+/* arrow and accessibility */
+nextBtn.addEventListener('click', ()=>{
+  if(idx < pieces.length - 1){
+    // manual advance: cancel auto then goTo and restart
+    stopAuto();
+    goTo(idx + 1);
+  } else {
+    // on last slide, clicking arrow does nothing (per current behaviour)
+  }
+});
+nextBtn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); nextBtn.click(); } });
+
+/* sound button */
+soundBtn.addEventListener('click', ()=>{
+  if(hairat.paused){ hairat.currentTime = 0; const p = hairat.play(); if(p && p.catch) p.catch(()=>{}); soundBtn.querySelector('#soundLabel').textContent = 'Playing'; }
+  else { hairat.pause(); soundBtn.querySelector('#soundLabel').textContent = 'Play sound'; }
+});
+soundBtn.addEventListener('keydown', (e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); soundBtn.click(); } });
+
+/* initial render */
+activateBackground(0);
+renderPiece(0);
+startAuto();
+
+/* pause non-active videos */
+bgVideos.forEach((v,i)=>{ if(v && i !== 0) try{ v.pause(); }catch(e){} });
+
+/* fallback: if only one piece, hide countdown and show sound */
+if(pieces.length === 1){ nextBtn.style.display = 'flex'; soundBtn.classList.add('show'); soundBtn.setAttribute('aria-hidden','false'); hideCountdown(); }
+
+</script>
+</body>
+</html>

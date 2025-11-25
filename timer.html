@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Timer — Single visible timer (dropdown)</title>
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@400;600;700&family=Amiri:wght@700&family=Sacramento&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Particles.js (kept) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+
+<style>
+/* Base */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
+  font-family:'Poppins',sans-serif; text-align:center; color:#fff; overflow:hidden; background:#060910; position:relative;
+}
+
+/* Ayesha Home Button */
+.ayesha-home {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    background: rgba(0, 0, 0, 0);       /* Transparent soft overlay */
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+
+    cursor: pointer;
+    z-index: 99999;
+
+    font-family: 'Amiri', serif;
+    font-size: 1.8rem;
+    color: #95c112;
+
+    box-shadow: 0 0 14px rgba(149, 193, 18, 0);
+    transition: all 0.20s ease;
+}
+
+.ayesha-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px rgba(149,193,18,0.45);
+}
+
+.ayesha-home i {
+    font-size: 1.6rem;
+    color: #95c112;
+}
+
+
+/* backgrounds */
+.starfield{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-2}
+.star{position:absolute;background:#fff;border-radius:50%;box-shadow:0 0 5px rgba(255,255,255,0.8);opacity:0.7;animation:twinkle linear infinite}
+@keyframes twinkle{0%,100%{opacity:0.7}50%{opacity:0.2}}
+#particles-js{position:absolute;width:100%;height:100%;background:transparent;z-index:-1}
+
+/* dropdown/menu */
+#dropdown-menu-container{position:absolute;top:20px;left:30px;z-index:40}
+#dropdown-icon{font-size:1.8rem;color:#00ffff;cursor:pointer;text-shadow:0 0 10px rgba(0,255,255,0.8);transition:color .18s, transform .18s; user-select:none}
+#dropdown-icon:hover{color:#ffffff; transform:scale(1.06)}
+
+/* dropdown hidden by default, revealed via data-open attribute */
+#stopwatch-selector{
+  display:none !important;
+  opacity:0;
+  transform:translateY(-6px);
+  position:absolute;
+  top:38px;
+  left:0;
+  background:rgba(0,0,0,0.95);
+  border:1px solid #00ffff;
+  border-radius:8px;
+  padding:8px 0;
+  min-width:260px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  color:#e0e7ff;
+  transition:opacity .18s ease, transform .18s ease;
+  pointer-events:none;
+}
+#stopwatch-selector[data-open="true"]{
+  display:block !important;
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+/* dropdown items */
+.dropdown-item{padding:8px 15px;font-size:1rem;cursor:pointer;white-space:nowrap;transition:background .12s,color .12s}
+.dropdown-item:hover{background:#00ffff;color:#000;font-weight:700}
+.dropdown-item.active{background:#00ffff;color:#000;font-weight:700}
+
+/* header & h1 */
+.sacramento-font{font-family:'Sacramento',cursive;color:#e6e6e6;text-shadow:0 0 8px rgba(255,255,255,0.5)}
+#intro-text{font-size:40px;margin-bottom:5px;margin-top:30px}
+h1{font-family:'Amiri','Cairo',sans-serif;font-size:2.5rem;background-image:linear-gradient(45deg,#00ffff,#ff0077);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 25px #00ffff,0 0 45px #ff0077;letter-spacing:3px;margin-bottom:8px;cursor:pointer;transition:all .1s}
+
+/* timer UI */
+#timer-view{display:flex;flex-direction:column;align-items:center;height:100%;overflow-y:auto;padding-top:60px;padding-bottom:60px;width:100%;z-index:10}
+.timer{background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,255,0.3);border-radius:15px;box-shadow:0 0 30px rgba(0,255,255,0.4);backdrop-filter:blur(10px);padding:15px 30px;transition:opacity .25s, transform .3s,box-shadow .4s;cursor:pointer;margin-top:18px;min-width:320px}
+.timer.hidden{opacity:0;transform:translateY(8px);pointer-events:none}
+.timer.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+.timer:hover{transform:scale(1.02);box-shadow:0 0 50px rgba(0,255,255,.6)}
+.timer-content{display:flex;flex-direction:column;align-items:center}
+.timer-title{font-size:1.2rem;font-weight:700;color:#00ffff;margin-bottom:5px;opacity:0;transition:opacity .5s;cursor:pointer}
+.timer-title.visible{opacity:1;text-shadow:0 0 10px #00ffff,0 0 20px #00aaff}
+.timer-title.date-view{font-size:1rem;font-weight:400;white-space:nowrap;color:#f0f4f8}
+.highlight{display:block;font-size:1.5rem;font-weight:700;background-image:linear-gradient(45deg,#00ffff,#ff0077);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 8px rgba(0,255,255,.4)}
+
+/* floating bubbles */
+.name-bubble{position:absolute;bottom:-50px;font-family:'Cairo',sans-serif;font-size:2rem;cursor:pointer;background-image:linear-gradient(45deg,#00ffff,#ff0077);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0.9;animation:floatUp linear infinite;white-space:nowrap;text-shadow:0 0 20px rgba(0,255,255,0.6);pointer-events:auto;transition:opacity .1s,transform .1s;user-select:none}
+@keyframes floatUp{0%{transform:translateY(0) translateX(0) scale(1);opacity:0.9}50%{transform:translateY(-60vh) translateX(15px) scale(1.1);opacity:0.7}100%{transform:translateY(-120vh) translateX(-15px) scale(1.3);opacity:0}}
+.bubble-burst{animation-name:burst !important;animation-duration:.3s !important;animation-timing-function:ease-out !important;pointer-events:none}
+@keyframes burst{0%{transform:scale(1.1);opacity:1}100%{transform:scale(2);opacity:0}}
+
+/* celebration banner */
+#celebration-banner{position:fixed;left:50%;top:12%;transform:translateX(-50%);z-index:60;display:none;background:linear-gradient(90deg,#ff0077,#00ffff);color:#000;padding:14px 22px;border-radius:12px;font-weight:700;box-shadow:0 6px 30px rgba(0,0,0,0.5)}
+
+/* bottom message */
+#bottom-message{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-size:1.6rem;white-space:nowrap;z-index:10}
+
+/* responsive tweaks */
+@media (max-width:600px){
+  #stopwatch-selector{min-width:200px;left:10px;top:42px}
+  .timer{min-width:240px;padding:12px 18px}
+  .highlight{font-size:1.1rem}
+}
+/* Fix: Make dropdown clickable above bubbles and animations */
+#dropdown-menu-container {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  z-index: 9999 !important;
+}
+
+#dropdown-icon {
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+}
+
+#stopwatch-selector {
+  z-index: 99999 !important;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Ayesha Home Redirect Component -->
+<div class="ayesha-home" onclick="goHome()">
+    <i class="ri-home-4-fill"></i>
+    <span>عائشة</span>
+</div>
+
+
+<!-- backgrounds -->
+<div class="starfield" id="starfield" aria-hidden="true"></div>
+<div id="particles-js" aria-hidden="true"></div>
+
+<!-- dropdown/menu -->
+<div id="dropdown-menu-container" aria-haspopup="true">
+  <i id="dropdown-icon" class="fas fa-bars" role="button" aria-label="Open menu" aria-expanded="false" tabindex="0"></i>
+  <div id="stopwatch-selector" role="menu" aria-hidden="true" data-open="false"></div>
+</div>
+
+<!-- celebration banner -->
+<div id="celebration-banner" role="status" aria-live="polite"></div>
+
+<!-- bottom message -->
+<div id="bottom-message" class="sacramento-font">Love you Always Ayesha meri jaan💞</div>
+
+<!-- timer view (only one visible at a time) -->
+<div id="timer-view" role="main" aria-live="polite">
+  <div id="intro-text" class="sacramento-font">in Love ♥️ with</div>
+  <h1 onclick="cycleNameColor(this)">عائشة سيف قادري</h1>
+
+  <!-- single container where the chosen timer will be rendered -->
+  <div id="single-timer-slot"></div>
+
+  
+</div>
+
+<!-- audio for bubble pop -->
+<audio id="bubble-sound" preload="auto" src="data:audio/mp3;base64,SUQzBAAAAAABVVZFVFdTU0U0LjExNgAAABhMQU1FMy45OS41qT0gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/uQZkAAAGcAAAASWYNQQFNRTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVT//6uQQEAAASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/7yZqgAAARkAAAAAAAAAAAAP/6uQQkAAASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/vJmrAAAApAAAAAAAAAAAAAASQQmJbW5n//yFVgAUAAAPeAAAAv4qgRkNE/+5CmkQAAARsAAAATWQU9lTEuOTkuNURVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVD/7kKdDAAAARoAAAAUWdY/4JkREg4aAABlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+8maQAAAC8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/7yZpQAAADoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAs/7yZpQAAAE4AAAATWdY/4JkRFRUeQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" ></audio>
+
+<script>
+
+function goHome() {
+    window.location.href = "index.html";  // redirect to main page
+}
+
+
+/* -------------------------
+   Data & config
+   ------------------------- */
+/* existing stopwatches */
+const stopwatchData = [
+  { id: 'story', title: 'Since Story Begins', start: '2024-06-13T20:54:00' },
+  { id: 'phone', title: 'Since Last Phone Call', start: '2025-11-16T11:14:00' },
+  { id: 'sms', title: 'Since Last SMS', start: '2025-11-11T11:11:00' },
+  { id: 'video', title: 'Since Last Video Call', start: '2025-10-10T16:04:45' },
+  { id: 'saw', title: 'Since Last Saw Her', start: '2025-11-11T13:22:00' },
+  { id: 'meet', title: 'Since Last Meet', start: '2025-10-06T18:00:00' },
+  { id: 'nocontact', title: 'Since No Contact', start: '2025-11-16T11:15:18' }
+];
+
+/* birthday and anniversary */
+const BIRTH_MONTH = 4, BIRTH_DAY = 27, BIRTH_YEAR = 2000; // May 27
+const ANNIV_MONTH = 5, ANNIV_DAY = 13, ANNIV_HOUR = 20, ANNIV_MIN = 54, ANNIV_BASE_YEAR = 2024;
+const CELEBRATION_DURATION_MS = 24 * 60 * 60 * 1000;
+
+/* UI state */
+let activeTimer = 'story'; // default = Since Story Begins
+let bubbleInterval = null;
+const bubbleSound = document.getElementById('bubble-sound');
+
+/* -------------------------
+   Helpers
+   ------------------------- */
+function now(){ return new Date(); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function breakdown(ms){ if (ms <= 0) return { days:'00', h:'00', min:'00', s:'00' }; const totalSeconds = Math.floor(ms/1000); const days = Math.floor(totalSeconds/(3600*24)); const secondsInDay = totalSeconds % (3600*24); const h = Math.floor(secondsInDay/3600); const min = Math.floor((secondsInDay%3600)/60); const s = totalSeconds % 60; return { days:String(days).padStart(2,'0'), h:String(h).padStart(2,'0'), min:String(min).padStart(2,'0'), s:String(s).padStart(2,'0') }; }
+
+/* compute next yearly dates (birthday at 00:00 local; anniversary at exact time) */
+function getNextBirthdayDateFromNow(){
+  const t = now(); let y = t.getFullYear();
+  let cand = new Date(y, BIRTH_MONTH, BIRTH_DAY, 0,0,0,0);
+  if (t >= new Date(cand.getTime() + CELEBRATION_DURATION_MS)) cand = new Date(y+1, BIRTH_MONTH, BIRTH_DAY, 0,0,0,0);
+  return cand;
+}
+function getNextAnniversaryDateFromNow(){
+  const t = now(); let y = t.getFullYear();
+  let cand = new Date(y, ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0);
+  if (t >= new Date(cand.getTime() + CELEBRATION_DURATION_MS)) cand = new Date(y+1, ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0);
+  return cand;
+}
+
+function isWithinCelebrationWindow(startDate){
+  const t = now();
+  return t >= startDate && t < new Date(startDate.getTime() + CELEBRATION_DURATION_MS);
+}
+
+/* -------------------------
+   Celebration helpers
+   ------------------------- */
+function showCelebrationBanner(text){
+  const b = document.getElementById('celebration-banner'); b.textContent = text; b.style.display = 'block';
+}
+function hideCelebrationBanner(){ const b=document.getElementById('celebration-banner'); b.style.display='none' }
+
+function spawnCelebrationBubbles(message, count=6){
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'name-bubble';
+    el.textContent = message;
+    const randomX = (Math.random()*80)-40;
+    el.style.left = `calc(50% + ${randomX}%)`;
+    el.style.fontSize = (1.2 + Math.random()*1.3) + 'rem';
+    el.style.animationDuration = (6 + Math.random()*8) + 's';
+    el.addEventListener('click', ()=>{ el.classList.add('bubble-burst'); setTimeout(()=>el.remove(),300); });
+    document.body.appendChild(el);
+    setTimeout(()=>{ if (el.parentElement) el.remove(); }, 22000);
+  }
+}
+
+/* -------------------------
+   Render single timer (the core change)
+   ------------------------- */
+function renderSelectedTimer() {
+  const slot = document.getElementById('single-timer-slot');
+  // fade out old
+  slot.innerHTML = ''; // clear first (we will insert one timer)
+  let html = '';
+  // find if activeTimer is one of the standard stopwatches
+  const std = stopwatchData.find(s => s.id === activeTimer);
+
+  if (std) {
+    // show a single stopwatch (counting up)
+    html = `<div id="timer-${std.id}" class="timer visible" data-start-time="${std.start}" data-id="${std.id}">
+      <div class="timer-content">
+        <div class="timer-title">${std.title}</div>
+        <div class="stopwatch-display">Loading…</div>
+      </div>
+    </div>`;
+    slot.innerHTML = html;
+    wireUpTimerInteractions(slot.querySelector('.timer'));
+  } else if (activeTimer === 'birthday') {
+    // determine celebration or countdown
+    const nowDate = now();
+    const thisYearStart = new Date(nowDate.getFullYear(), BIRTH_MONTH, BIRTH_DAY, 0,0,0,0);
+    const inWindow = isWithinCelebrationWindow(thisYearStart) || isWithinCelebrationWindow(new Date(thisYearStart.getFullYear()-1, BIRTH_MONTH, BIRTH_DAY, 0,0,0,0));
+    if (inWindow) {
+      const age = nowDate.getFullYear() - BIRTH_YEAR;
+      html = `<div class="timer birthday visible" data-type="birthday">
+        <div class="timer-content">
+          <div class="timer-title">🎂 Birthday — Today</div>
+          <div class="stopwatch-display celebration-text">Happy ${age}th Birthday Ayesha ❤️</div>
+        </div>
+      </div>`;
+      slot.innerHTML = html;
+      showCelebrationBanner(`Happy ${age}th Birthday Ayesha ❤️  Love and care till Heaven and back 💞  May ALLAH bless you with health, wealth & happiness 🤲✨`);
+    } else {
+      const nextBD = getNextBirthdayDateFromNow();
+      const diff = nextBD - now();
+      const t = breakdown(diff);
+      html = `<div class="timer birthday visible" data-type="birthday" data-next="${nextBD.toISOString()}">
+        <div class="timer-content">
+          <div class="timer-title">🎂 Birthday Countdown</div>
+          <div class="stopwatch-display"><span><span class="highlight">${t.days}</span>Days</span> <span><span class="highlight">${t.h}</span>Hours</span> <span><span class="highlight">${t.min}</span>Minutes</span> <span><span class="highlight">${t.s}</span>Seconds</span></div>
+        </div>
+      </div>`;
+      slot.innerHTML = html;
+      hideCelebrationBanner();
+      wireUpTimerInteractions(slot.querySelector('.timer'));
+    }
+  } else if (activeTimer === 'anniversary') {
+    const nowDate = now();
+    const thisYearAnn = new Date(nowDate.getFullYear(), ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0);
+    const inWindow = isWithinCelebrationWindow(thisYearAnn) || isWithinCelebrationWindow(new Date(thisYearAnn.getFullYear()-1, ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0));
+    if (inWindow) {
+      const annCount = nowDate.getFullYear() - ANNIV_BASE_YEAR;
+      html = `<div class="timer anniversary visible" data-type="anniversary">
+        <div class="timer-content">
+          <div class="timer-title">💞 Anniversary — Today</div>
+          <div class="stopwatch-display celebration-text">Happy ${annCount}th Anniversary my love ✨</div>
+        </div>
+      </div>`;
+      slot.innerHTML = html;
+      showCelebrationBanner(`Happy ${annCount}th Anniversary my love ✨`);
+      spawnCelebrationBubbles('Happy Anniversary my love', 8);
+    } else {
+      const nextA = getNextAnniversaryDateFromNow();
+      const diffA = nextA - now();
+      const ta = breakdown(diffA);
+      html = `<div class="timer anniversary visible" data-type="anniversary" data-next="${nextA.toISOString()}">
+        <div class="timer-content">
+          <div class="timer-title">💞 Anniversary Countdown</div>
+          <div class="stopwatch-display"><span><span class="highlight">${ta.days}</span>Days</span> <span><span class="highlight">${ta.h}</span>Hours</span> <span><span class="highlight">${ta.min}</span>Minutes</span> <span><span class="highlight">${ta.s}</span>Seconds</span></div>
+        </div>
+      </div>`;
+      slot.innerHTML = html;
+      hideCelebrationBanner();
+      wireUpTimerInteractions(slot.querySelector('.timer'));
+    }
+  } else {
+    // default fallback
+    slot.innerHTML = `<div class="timer visible"><div class="timer-content"><div class="timer-title">Unknown</div><div class="stopwatch-display">—</div></div></div>`;
+  }
+
+  // update dropdown active highlight
+  updateDropdownActiveState();
+}
+
+/* attach handlers for click-to-show-title and title toggle */
+function wireUpTimerInteractions(timerEl) {
+  if (!timerEl) return;
+  const content = timerEl.querySelector('.timer-content');
+  const title = timerEl.querySelector('.timer-title');
+  const startTime = timerEl.getAttribute('data-start-time') || timerEl.getAttribute('data-next');
+
+  // ensure no duplicate listeners: clone trick
+  const newContent = content.cloneNode(true);
+  content.parentNode.replaceChild(newContent, content);
+  const newTitle = newContent.querySelector('.timer-title');
+
+  newContent.addEventListener('click', () => {
+    if (!newTitle.classList.contains('visible')) {
+      newTitle.classList.add('visible');
+      newTitle.classList.remove('date-view');
+    }
+  });
+
+  newTitle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (newTitle.classList.contains('date-view')) {
+      newTitle.textContent = newTitle.getAttribute('data-original-text') || newTitle.textContent;
+      newTitle.classList.remove('date-view');
+    } else {
+      if (startTime) {
+        if (!newTitle.getAttribute('data-original-text')) newTitle.setAttribute('data-original-text', newTitle.textContent);
+        newTitle.textContent = formatDateForDisplay(startTime);
+        newTitle.classList.add('date-view');
+      }
+    }
+  });
+}
+
+/* format date nicely */
+function formatDateForDisplay(dateString) {
+  try {
+    const d = new Date(dateString);
+    const dateOptions = { year:'numeric', month:'long', day:'numeric' };
+    const timeOptions = { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
+    return d.toLocaleDateString('en-US', dateOptions) + ' ' + d.toLocaleTimeString('en-US', timeOptions);
+  } catch(e) { return dateString; }
+}
+
+/* -------------------------
+   Dropdown generation & control
+   ------------------------- */
+const dropdownIcon = document.getElementById('dropdown-icon');
+const dropdownSelector = document.getElementById('stopwatch-selector');
+let dropdownOpen = false;
+
+function setDropdownOpen(open) {
+  dropdownOpen = !!open;
+  dropdownSelector.setAttribute('data-open', dropdownOpen ? 'true' : 'false');
+  dropdownSelector.setAttribute('aria-hidden', (!dropdownOpen).toString());
+  dropdownIcon.setAttribute('aria-expanded', dropdownOpen.toString());
+}
+function toggleDropdown() { setDropdownOpen(!dropdownOpen); }
+
+function updateDropdownActiveState(){
+  document.querySelectorAll('.dropdown-item').forEach(it => it.classList.remove('active'));
+  const sel = document.querySelector(`.dropdown-item[data-id="${activeTimer}"]`);
+  if (sel) sel.classList.add('active');
+}
+
+/* generate dropdown list (contains birthday & anniversary + standard timers) */
+function generateDropdown(){
+  const el = dropdownSelector;
+  el.innerHTML = '';
+
+  // Timer view heading
+  const timerViewItem = document.createElement('div');
+  timerViewItem.className = 'dropdown-item';
+  timerViewItem.textContent = '⏱️ Timer View';
+  timerViewItem.role = 'menuitem';
+  timerViewItem.onclick = () => { setDropdownOpen(false); renderSelectedTimer(); };
+  el.appendChild(timerViewItem);
+
+  // separator
+  const addHR = () => { const hr = document.createElement('div'); hr.className = 'dropdown-hr'; el.appendChild(hr); };
+  addHR();
+
+  // Birthday
+  const birthdayItem = document.createElement('div');
+  birthdayItem.className = 'dropdown-item';
+  birthdayItem.textContent = '🎂 Birthday Countdown';
+  birthdayItem.setAttribute('data-id','birthday');
+  birthdayItem.role = 'menuitem';
+  birthdayItem.onclick = () => { activeTimer = 'birthday'; setDropdownOpen(false); renderSelectedTimer(); };
+  el.appendChild(birthdayItem);
+
+  // Anniversary
+  const annivItem = document.createElement('div');
+  annivItem.className = 'dropdown-item';
+  annivItem.textContent = '💞 Anniversary Countdown';
+  annivItem.setAttribute('data-id','anniversary');
+  annivItem.role = 'menuitem';
+  annivItem.onclick = () => { activeTimer = 'anniversary'; setDropdownOpen(false); renderSelectedTimer(); };
+  el.appendChild(annivItem);
+
+  addHR();
+
+  // header label
+  const header = document.createElement('div');
+  header.className = 'dropdown-item';
+  header.textContent = 'Select Timer:';
+  header.style.cursor = 'default';
+  header.style.fontWeight = '700';
+  header.style.color = '#ccc';
+  header.style.backgroundColor = 'transparent';
+  el.appendChild(header);
+
+  // standard timers (only included in dropdown)
+  stopwatchData.forEach(d=>{
+    const item = document.createElement('div');
+    item.className = 'dropdown-item dropdown-timer-item';
+    item.textContent = d.title;
+    item.setAttribute('data-id', d.id);
+    item.role = 'menuitem';
+    item.onclick = () => { activeTimer = d.id; setDropdownOpen(false); renderSelectedTimer(); };
+    el.appendChild(item);
+  });
+
+  // ensure active highlighted
+  updateDropdownActiveState();
+
+  // close initially
+  setDropdownOpen(false);
+}
+
+/* -------------------------
+   Periodic tick update
+   ------------------------- */
+function tick() {
+  // For 'standard' stopwatch view, update the numeric content of the visible element
+  const visibleTimer = document.querySelector('#single-timer-slot .timer.visible');
+  if (visibleTimer) {
+    const id = visibleTimer.getAttribute('data-id');
+    const type = visibleTimer.getAttribute('data-type');
+    if (id) {
+      // standard stopwatch counting up
+      const startAttr = visibleTimer.getAttribute('data-start-time');
+      if (startAttr) {
+        const start = new Date(startAttr);
+        const nowDiff = now() - start;
+        const t = breakdown(nowDiff);
+        const display = visibleTimer.querySelector('.stopwatch-display');
+        if (display) display.innerHTML = `<span><span class="highlight">${t.days}</span>Days</span> <span><span class="highlight">${t.h}</span>Hours</span> <span><span class="highlight">${t.min}</span>Minutes</span> <span><span class="highlight">${t.s}</span>Seconds</span>`;
+      }
+    } else if (type === 'birthday') {
+      // birthday block may be a countdown or celebration
+      const inWindow = (() => {
+        const nowDate = now();
+        const thisYearStart = new Date(nowDate.getFullYear(), BIRTH_MONTH, BIRTH_DAY, 0,0,0,0);
+        return isWithinCelebrationWindow(thisYearStart) || isWithinCelebrationWindow(new Date(thisYearStart.getFullYear()-1, BIRTH_MONTH, BIRTH_DAY, 0,0,0,0));
+      })();
+      if (inWindow) {
+        // keep banner shown; nothing to update inside the static celebration text
+      } else {
+        // update countdown numbers from data-next attribute if present
+        const nextIso = visibleTimer.getAttribute('data-next');
+        if (nextIso) {
+          const diff = new Date(nextIso) - now();
+          const t = breakdown(diff);
+          const display = visibleTimer.querySelector('.stopwatch-display');
+          if (display) display.innerHTML = `<span><span class="highlight">${t.days}</span>Days</span> <span><span class="highlight">${t.h}</span>Hours</span> <span><span class="highlight">${t.min}</span>Minutes</span> <span><span class="highlight">${t.s}</span>Seconds</span>`;
+        }
+      }
+    } else if (type === 'anniversary') {
+      const inWindow = (() => {
+        const nowDate = now();
+        const thisYearAnn = new Date(nowDate.getFullYear(), ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0);
+        return isWithinCelebrationWindow(thisYearAnn) || isWithinCelebrationWindow(new Date(thisYearAnn.getFullYear()-1, ANNIV_MONTH, ANNIV_DAY, ANNIV_HOUR, ANNIV_MIN, 0, 0));
+      })();
+      if (inWindow) {
+        // static celebration text
+      } else {
+        const nextIso = visibleTimer.getAttribute('data-next');
+        if (nextIso) {
+          const diffA = new Date(nextIso) - now();
+          const ta = breakdown(diffA);
+          const display = visibleTimer.querySelector('.stopwatch-display');
+          if (display) display.innerHTML = `<span><span class="highlight">${ta.days}</span>Days</span> <span><span class="highlight">${ta.h}</span>Hours</span> <span><span class="highlight">${ta.min}</span>Minutes</span> <span><span class="highlight">${ta.s}</span>Seconds</span>`;
+        }
+      }
+    }
+  }
+}
+
+/* -------------------------
+   Bubbles & backgrounds
+   ------------------------- */
+const names = ["عائشة","سيف"];
+function createNameBubble(){
+  const el = document.createElement('div');
+  el.className = 'name-bubble';
+  el.textContent = names[Math.floor(Math.random()*names.length)];
+  const randomX = Math.random()*60 - 30;
+  el.style.left = `calc(50% + ${randomX}%)`;
+  el.style.fontSize = (Math.random()*1.5 + 1.5) + 'rem';
+  el.style.animationDuration = (8 + Math.random()*10) + 's';
+  el.addEventListener('click', ()=>{ el.classList.add('bubble-burst'); setTimeout(()=>el.remove(),300); });
+  el.addEventListener('touchstart', (e)=>{ e.preventDefault(); el.classList.add('bubble-burst'); setTimeout(()=>el.remove(),300); });
+  document.body.appendChild(el);
+  setTimeout(()=>{ if (el.parentElement) el.remove(); }, 19000);
+}
+
+function spawnStars(){
+  const starfield = document.getElementById('starfield');
+  for(let i=0;i<150;i++){
+    const star=document.createElement('div');
+    star.className='star';
+    const size = Math.random()*2 + 1;
+    star.style.width = star.style.height = `${size}px`;
+    star.style.top = `${Math.random()*100}%`;
+    star.style.left = `${Math.random()*100}%`;
+    star.style.animationDelay = `${Math.random()*15}s`;
+    star.style.animationDuration = `${Math.random()*8+7}s`;
+    if (starfield) starfield.appendChild(star);
+  }
+}
+
+function initParticles(){
+  if (typeof particlesJS !== 'undefined') {
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 40, density: { enable: true, value_area: 800 } },
+        color: { value: '#ff0077' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.6 },
+        size: { value: 4, random: true },
+        line_linked: {
+          enable: true, distance: 150, color: '#00ffff', opacity: 0.4, width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: 'none',
+          out_mode: 'out',
+          attract: {
+            enable: true,
+            rotateX: 600,
+            rotateY: 600
+          }
+        }
+      },
+
+      /* 💙 NEW IMPROVED INTERACTIVITY */
+      interactivity: {
+        detect_on: 'canvas',
+        events: {
+          onhover: { enable: true, mode: 'grab' },
+          onclick: { enable: true, mode: 'push' },
+          onmousemove: { enable: false }, // we'll handle movement manually
+          resize: true
+        },
+        modes: {
+          grab: { distance: 180, line_linked: { opacity: 1 } },
+          push: { particles_nb: 4 }
+        }
+      },
+
+      retina_detect: true
+    });
+  }
+}
+
+/* -------------------------
+   Accessibility keyboard toggle
+   ------------------------- */
+dropdownIcon.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDropdown(); }
+});
+
+/* -------------------------
+   Particle cursor/touch control
+   ------------------------- */
+function enableParticleCursorControl() {
+  // Try repeatedly until particlesJS has created its pJSDom entry and canvas is ready
+  const tryEnable = setInterval(() => {
+    if (window.pJSDom && pJSDom.length > 0 && pJSDom[0].pJS && pJSDom[0].pJS.canvas && pJSDom[0].pJS.canvas.el) {
+      clearInterval(tryEnable);
+
+      // The canvas element used by particles.js
+      const particleCanvas = pJSDom[0].pJS.canvas.el;
+
+      // Helper that writes pointer into the particles.js internal mouse state
+      function setParticlePointer(clientX, clientY) {
+        const rect = particleCanvas.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        // safety checks
+        if (!pJSDom[0] || !pJSDom[0].pJS || !pJSDom[0].pJS.interactivity) return;
+
+        const inter = pJSDom[0].pJS.interactivity;
+        inter.mouse.pos_x = x;
+        inter.mouse.pos_y = y;
+        // tell particles.js the mouse is moving (some versions check this)
+        inter.status = 'mousemove';
+      }
+
+      // Desktop cursor move
+      const onMouseMove = (e) => setParticlePointer(e.clientX, e.clientY);
+      document.addEventListener('mousemove', onMouseMove);
+
+      // Mobile touch movement support — we set passive:false so we can prevent default if needed
+      const onTouchMove = (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        const t = e.touches[0];
+        setParticlePointer(t.clientX, t.clientY);
+      };
+      document.addEventListener('touchmove', onTouchMove, { passive: true });
+
+      // Reset on touch end (mobile) or mouse leave
+      const resetPointer = () => {
+        if (!pJSDom[0] || !pJSDom[0].pJS || !pJSDom[0].pJS.interactivity) return;
+        const inter = pJSDom[0].pJS.interactivity;
+        inter.mouse.pos_x = null;
+        inter.mouse.pos_y = null;
+        inter.status = null;
+      };
+
+      document.addEventListener('touchend', resetPointer);
+      window.addEventListener('blur', resetPointer);
+
+      console.log("✅ Cursor-to-Particle control activated.");
+    }
+  }, 250);
+}
+
+/* -------------------------
+   Init
+   ------------------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  generateDropdown();
+  spawnStars();
+  initParticles();
+
+  // enable particle cursor control after particles are initialised
+  setTimeout(enableParticleCursorControl, 400);
+
+  // bubbles (cosmetic)
+  bubbleInterval = setInterval(createNameBubble, 1200);
+  for (let i=0;i<8;i++) setTimeout(createNameBubble, i*600);
+
+  // initial render: only show default timer (Since Story Begins)
+  renderSelectedTimer();
+
+  // tick every second to refresh numbers
+  setInterval(tick, 1000);
+
+  // close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    const selector = document.getElementById('stopwatch-selector');
+    const icon = document.getElementById('dropdown-icon');
+    if (!selector.contains(e.target) && e.target !== icon && !icon.contains(e.target)) {
+      setDropdownOpen(false);
+    }
+  });
+});
+
+// Ensure dropdown icon actually toggles the menu
+dropdownIcon.onclick = () => {
+  toggleDropdown();
+};
+
+</script>
+</body>
+</html>

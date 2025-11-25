@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Word Burst — Game (Rules)</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --day-sky-1: #a8edea;
+    --day-sky-2: #fed6e3;
+    --dusk-1: #ff9a9e;
+    --dusk-2: #fecfef;
+    --night-sky-1:#07102a;
+    --night-sky-2:#001028;
+    --sun:#FFD166;
+    --moon:#cfe9ff;
+    --accent1: #ff5fa2;
+    --accent2: #00e5ff;
+    --accent3: #8a7bff;
+    --ui-bg: rgba(255,255,255,0.03);
+    --ui-border: rgba(255,255,255,0.06);
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Cairo','Playfair Display',serif;-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+  body{background:#07102a;overflow:hidden;color:#fff}
+
+  /* Ayesha Home Button */
+.ayesha-home {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    background: rgba(0,0,0,0.15);       /* Transparent soft overlay */
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+
+    cursor: pointer;
+    z-index: 99999;
+
+    font-family: 'Amiri', serif;
+    font-size: 1.8rem;
+    color: #95c112;
+
+    box-shadow: 0 0 14px rgba(149,193,18,0.25);
+    transition: all 0.20s ease;
+}
+
+.ayesha-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px rgba(149,193,18,0.45);
+}
+
+.ayesha-home i {
+    font-size: 1.6rem;
+    color: #95c112;
+}
+
+
+  /* Sky & environment */
+  .sky { position:fixed;inset:0;z-index:0;pointer-events:none;transition:background 2.4s ease; background: linear-gradient(180deg, var(--night-sky-1), var(--night-sky-2)); }
+  .sky.day{ background: linear-gradient(180deg, var(--day-sky-1), var(--day-sky-2)); }
+  .sky.dusk{ background: linear-gradient(180deg, var(--dusk-1), var(--dusk-2)); }
+
+  .sun, .moon { position:fixed; width:110px;height:110px;border-radius:50%; top:12%; right:-12%; transition: all 2.8s ease; z-index:1; pointer-events:none; }
+  .sun{ background: radial-gradient(circle at 30% 30%, var(--sun), #ffb85c); filter: drop-shadow(0 20px 60px rgba(255,170,80,0.12)); }
+  .moon{ background: radial-gradient(circle at 30% 30%, var(--moon), #9fbfe8); box-shadow: 0 10px 40px rgba(0,0,0,0.2); opacity:0; }
+
+  .sky.day ~ .sun{ right:8%; opacity:1 }
+  .sky.day ~ .moon{ right:-24%; opacity:0 }
+  .sky.night ~ .sun{ right:-20%; opacity:0 }
+  .sky.night ~ .moon{ right:8%; opacity:1 }
+
+  .clouds { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:visible; }
+  .cloud { position:absolute; top:14%; left:-30%; width:220px; height:70px; border-radius:40px; background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82)); box-shadow: 0 18px 50px rgba(0,0,0,0.12); opacity:0.92; transform: translateX(0); }
+  .cloud.c1{ animation:cloudMove 36s linear infinite; top:12%; left:-28%; width:240px; height:78px; opacity:0.95 }
+  .cloud.c2{ animation:cloudMove 48s linear infinite; top:20%; left:-20%; width:180px; height:60px; opacity:0.9 }
+  .cloud.c3{ animation:cloudMove 56s linear infinite; top:8%; left:-42%; width:300px; height:98px; opacity:0.88 }
+  @keyframes cloudMove { 0%{ transform:translateX(0) } 100%{ transform:translateX(140vw) } }
+
+  .rain { position:fixed; inset:0; z-index:2; pointer-events:none; overflow:visible; opacity:0; transition:opacity 1.2s ease; }
+  .rain.show { opacity:1; }
+  .raindrop { position:absolute; width:2px; height:18px; background: linear-gradient(180deg, rgba(200,220,255,0.9), rgba(200,220,255,0.45)); border-radius:2px; opacity:0.9; filter: blur(0.2px); }
+
+  .stars { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity 1.2s ease; }
+  .stars.show { opacity:1; }
+  .star { position:absolute; width:2px;height:2px;border-radius:50%; background: #fff; box-shadow:0 0 8px rgba(255,255,255,0.8); opacity:0.9 }
+
+  /* game container */
+  .game { position:relative; inset:0; width:100%; height:100vh; z-index:4; overflow:hidden; }
+
+  /* HUD - z-index increased so it's above play area */
+  .hud { position:fixed; right:20px; top:18px; z-index:220; display:flex; flex-direction:column; gap:12px; align-items:flex-end; pointer-events:auto; }
+  .score {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border:1px solid var(--ui-border); padding:12px 16px; border-radius:14px; backdrop-filter: blur(8px); color:#fff;
+    min-width:180px; text-align:right; box-shadow: 0 12px 40px rgba(0,0,0,0.45); display:flex; flex-direction:column; gap:6px;
+  }
+  .score .label { font-size:12px;color:#cfefff;opacity:0.95; text-transform:uppercase; letter-spacing:0.08em; }
+  .score .value { font-size:28px; color:var(--accent1); text-shadow: 0 12px 40px rgba(255,95,162,0.18); font-weight:800; }
+
+  .rules-btn {
+    width:100%;
+    margin-top:6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #fff;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:14px;
+    cursor:pointer;
+    text-align:center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    pointer-events:auto;
+  }
+  .rules-btn:active { transform: translateY(1px); }
+
+  /* Rules panel (d-card) - z-index increased */
+  .rules-panel {
+    position:fixed; right:20px; top:110px; z-index:240; width:260px; max-height:62vh; overflow:auto;
+    background: linear-gradient(180deg, rgba(6,10,20,0.86), rgba(10,18,32,0.82));
+    border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:12px; display:none; box-shadow:0 14px 60px rgba(2,6,18,0.7);
+  }
+  .rules-panel h4{ margin-bottom:8px; font-size:15px; color:#fff; text-align:left }
+  .rule-item{ display:flex; justify-content:space-between; padding:8px 10px; border-radius:8px; color:#e6eef8; font-size:14px; align-items:center }
+  .rule-item .word { font-weight:700; font-size:14px; text-align:left; color:inherit; text-shadow:none; }
+  .rule-item:nth-child(odd){ background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); }
+
+  .instructions { position:fixed; left:50%; top:10%; transform:translateX(-50%); z-index:200; width:min(720px,94%); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:12px 16px; border-radius:12px; backdrop-filter: blur(6px); text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.45); }
+  .instructions.hidden { opacity:0; transform:translateX(-50%) translateY(-8px) scale(.995); pointer-events:none; transition:all .28s ease-in-out }
+
+  /* increased word size and glow */
+  .word {
+    position:absolute; bottom:-120px; left:50%; transform:translateX(-50%);
+    font-family:'Playfair Display','Cairo', serif; font-weight:700;
+    font-size:34px; cursor:pointer; user-select:none; pointer-events:auto;
+    white-space:nowrap; z-index:210; transition: transform .08s ease, text-shadow .12s ease;
+    text-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  .word.c1 { color: var(--accent1); text-shadow: 0 12px 54px rgba(255,95,162,0.28), 0 0 16px rgba(255,95,162,0.16) }
+  .word.c2 { color: var(--accent2); text-shadow: 0 12px 54px rgba(0,229,255,0.22), 0 0 14px rgba(0,229,255,0.12) }
+  .word.c3 { color: var(--accent3); text-shadow: 0 12px 54px rgba(138,123,255,0.18), 0 0 12px rgba(138,123,255,0.08) }
+  .word.c4 { color:#fff; text-shadow: 0 12px 42px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.06) }
+
+  .pulse { position:fixed; width:24px; height:24px; border-radius:50%; pointer-events:none; z-index:250; mix-blend-mode:screen; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), rgba(255,255,255,0.02)); }
+  .particle { position:fixed; width:10px; height:10px; border-radius:50%; pointer-events:none; z-index:250; mix-blend-mode:screen; }
+
+  .footer-note { position:fixed; left:50%; transform:translateX(-50%); bottom:14px; font-size:13px; color:#cfefff; opacity:.85; z-index:200; pointer-events:none; }
+
+  @media (max-width:720px){
+    .word { font-size:26px }
+    .score { min-width:150px; padding:10px 12px }
+    .rules-panel { right:12px; width:86vw; left:auto }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ayesha Home Redirect Component -->
+<div class="ayesha-home" onclick="goHome()">
+    <i class="ri-home-4-fill"></i>
+    <span>عائشة</span>
+</div>
+
+
+  <!-- background layers -->
+  <div class="sky night" id="sky"></div>
+  <div class="sun" id="sun" aria-hidden="true"></div>
+  <div class="moon" id="moon" aria-hidden="true"></div>
+
+  <div class="clouds" id="clouds" aria-hidden="true">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <div class="rain" id="rain" aria-hidden="true"></div>
+  <div class="stars" id="stars" aria-hidden="true"></div>
+
+  <!-- game -->
+  <div class="game" id="game">
+    <div id="playArea" style="position:absolute;inset:0;z-index:100;"></div>
+
+    <div class="hud" aria-hidden="false">
+      <div class="score" aria-live="polite" role="status" aria-label="Score">
+        <div class="label">Score</div>
+        <div class="value" id="scoreValue">0</div>
+
+        <!-- Game Rules button replaces combo -->
+        <button id="rulesBtn" class="rules-btn" type="button" aria-expanded="false" title="Show game rules">Game Rules</button>
+      </div>
+    </div>
+
+    <!-- Rules panel (d-card) -->
+    <div id="rulesPanel" class="rules-panel" role="dialog" aria-hidden="true" aria-label="Game scoring rules">
+      <h4>Scoring Rules</h4>
+      <div id="rulesList"></div>
+      <div style="margin-top:8px;font-size:12px;color:#cfefff">Words not in this list use the default base score.</div>
+    </div>
+
+    <div class="instructions" id="instructions" role="dialog" aria-label="Game instructions">
+      <h2>Word Burst — Day & Weather</h2>
+      <p>Tap / click the floating words to burst them. Words use an aesthetic font and neon glow. Background cycles day/night and weather. Space spawns a word, P toggles auto-spawn.</p>
+    </div>
+
+    <div class="footer-note">Words: عائشة · سيف · وفاداری · خیال · عزت · honesty · loyalty · love · fake · real</div>
+  </div>
+
+  <!-- small pop sound -->
+  <audio id="popSound" preload="auto" src="data:audio/mp3;base64,SUQzAwAAAAAAACQAAAAAAABPUEZMAAAAAAA="></audio>
+
+<script>
+
+function goHome() {
+    window.location.href = "index.html";  // redirect to main page
+}
+
+
+/* ---------- GameScript (same mechanics). Fixed z-index so rules button is clickable. ---------- */
+
+/* Words list */
+const WORDS = ["عائشة","سيف","وفاداری","خیال","عزت","honesty","loyalty","care","importance","respect","understanding","priority","love","fake","real"];
+
+/* Score mapping */
+const SCORE_RULES = {
+  "سيف": 0,
+  "saif": 0,
+  "عائشة": 100,
+  "ayesha": 100,
+  "loyalty": 0,
+  "وفاداری": 0,
+  "honesty": 50,
+  "care": 30,
+  "importance": 25,
+  "respect": 40,
+  "understanding": 45,
+  "priority": 20,
+  "love": 80,
+  "fake": -20,
+  "real": 35,
+  "عزت": 40,
+  "خیال": 30
+};
+const DEFAULT_BASE = 10;
+const COLOR_CLASSES = ['c1','c2','c3','c4'];
+
+let score = 0;
+let combo = 1;
+let lastPop = 0;
+let comboTimer = null;
+let autoSpawn = true;
+let spawnInterval = 1200;
+let spawnTimer = null;
+
+/* DOM refs */
+const playArea = document.getElementById('playArea');
+const scoreValue = document.getElementById('scoreValue');
+const instructions = document.getElementById('instructions');
+const popSound = document.getElementById('popSound');
+
+const rulesBtn = document.getElementById('rulesBtn');
+const rulesPanel = document.getElementById('rulesPanel');
+const rulesList = document.getElementById('rulesList');
+
+function normalizeKey(word){
+  if(!word) return word;
+  const arabicRegex = /[\u0600-\u06FF]/;
+  if(arabicRegex.test(word)) return word;
+  return word.toLowerCase();
+}
+
+function buildRulesPanel(){
+  rulesList.innerHTML = '';
+  const added = new Set();
+  Object.keys(SCORE_RULES).forEach(rawKey => {
+    if(added.has(rawKey)) return;
+    const val = SCORE_RULES[rawKey];
+    const item = document.createElement('div');
+    item.className = 'rule-item';
+    item.innerHTML = `<div class="word">${rawKey}</div><div style="font-weight:700">${val} pts</div>`;
+    rulesList.appendChild(item);
+    added.add(rawKey);
+  });
+  const defaultRow = document.createElement('div');
+  defaultRow.className = 'rule-item';
+  defaultRow.style.marginTop = '8px';
+  defaultRow.innerHTML = `<div style="font-weight:700">Default</div><div>${DEFAULT_BASE} pts</div>`;
+  rulesList.appendChild(defaultRow);
+}
+
+function toggleRulesPanel(){
+  const open = rulesPanel.style.display === 'block';
+  if(open){
+    rulesPanel.style.display = 'none';
+    rulesBtn.setAttribute('aria-expanded','false');
+    rulesPanel.setAttribute('aria-hidden','true');
+  } else {
+    buildRulesPanel();
+    rulesPanel.style.display = 'block';
+    rulesPanel.setAttribute('aria-hidden','false');
+    rulesBtn.setAttribute('aria-expanded','true');
+  }
+}
+
+function rand(min,max){ return Math.random()*(max-min)+min; }
+
+function createWord(wordText){
+  const el = document.createElement('div');
+  el.className = 'word';
+  el.textContent = wordText;
+  const cls = COLOR_CLASSES[Math.floor(Math.random()*COLOR_CLASSES.length)];
+  el.classList.add(cls);
+
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const margin = Math.min(80, vw * 0.06);
+  const left = rand(margin, vw - margin);
+  el.style.left = left + 'px';
+
+  const baseSize = Math.min(64, Math.max(20, 24 + Math.floor(wordText.length * 3)));
+  el.style.fontSize = baseSize + 'px';
+
+  playArea.appendChild(el);
+
+  const duration = rand(5.2, 11.2);
+  const travel = window.innerHeight + 360;
+  const drift = rand(-140,140);
+  const start = performance.now();
+
+  function popHandler(ev){
+    ev.stopPropagation();
+    let clientX = ev.clientX, clientY = ev.clientY;
+    if(ev.touches && ev.touches[0]) { clientX = ev.touches[0].clientX; clientY = ev.touches[0].clientY; }
+    popAt(el, clientX, clientY);
+    hideInstructions();
+  }
+  el.addEventListener('click', popHandler);
+  el.addEventListener('touchstart', function(ev){ ev.preventDefault(); popHandler(ev); }, {passive:false});
+
+  let rafId = null;
+  function frame(now){
+    const t = Math.min(1, (now - start) / (duration * 1000));
+    const eased = 1 - Math.pow(1 - t, 2.0);
+    const y = eased * travel;
+    el.style.transform = `translate(-50%,-${y}px) translateX(${drift*eased}px)`;
+    el.style.opacity = String(1 - Math.min(0.98, t + 0.02));
+    if(t < 1) rafId = requestAnimationFrame(frame);
+    else { if(el.parentElement) el.remove(); cancelAnimationFrame(rafId); }
+  }
+  rafId = requestAnimationFrame(frame);
+
+  setTimeout(()=>{ if(el.parentElement) el.remove(); cancelAnimationFrame(rafId); }, (duration + 2) * 1000);
+}
+
+function spawnRandomWord(){ const w = WORDS[Math.floor(Math.random()*WORDS.length)]; createWord(w); }
+function spawnWordWithText(word){ createWord(word); }
+
+function popAt(wordEl, x, y){
+  if(!wordEl) return;
+  if(!x || !y){
+    const r = wordEl.getBoundingClientRect();
+    x = r.left + r.width/2;
+    y = r.top + r.height/2;
+  }
+
+  const count = 12 + Math.floor(Math.random()*10);
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = rand(6, 12);
+    p.style.width = p.style.height = size + 'px';
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.opacity = 1;
+    p.style.background = (i%2) ? 'linear-gradient(90deg,var(--accent2),var(--accent1))' : 'linear-gradient(90deg,var(--accent1),var(--accent3))';
+    document.body.appendChild(p);
+
+    const angle = rand(0, Math.PI*2);
+    const speed = rand(60, 280);
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    const start = performance.now();
+    const life = rand(420, 980);
+
+    (function animateParticle(t0, el, dx0, dy0, lifeTime){
+      function pf(now){
+        const tt = Math.min(1, (now - t0)/lifeTime);
+        const ease = 1 - Math.pow(1 - tt, 2);
+        el.style.transform = `translate(${dx0 * ease}px, ${dy0 * ease}px) scale(${1 - 0.45*ease})`;
+        el.style.opacity = String(1 - ease);
+        if(tt < 1) requestAnimationFrame(pf);
+        else { if(el.parentElement) el.remove(); }
+      }
+      requestAnimationFrame(pf);
+    })(start, p, dx, dy, life);
+  }
+
+  const pulse = document.createElement('div');
+  pulse.className = 'pulse';
+  pulse.style.left = x + 'px'; pulse.style.top = y + 'px';
+  document.body.appendChild(pulse);
+  const pulseStart = performance.now();
+  (function animatePulse(t0, el){
+    function pf(now){
+      const tt = Math.min(1, (now - t0)/380);
+      const s = 1 + tt*3.2;
+      el.style.transform = `translate(-50%,-50%) scale(${s})`;
+      el.style.opacity = String(1 - tt);
+      if(tt < 1) requestAnimationFrame(pf);
+      else { if(el.parentElement) el.remove(); }
+    }
+    requestAnimationFrame(pf);
+  })(pulseStart, pulse);
+
+  try{ popSound.currentTime = 0; popSound.play().catch(()=>{}); }catch(e){}
+
+  const text = (wordEl.textContent || '').trim();
+  const key = normalizeKey(text);
+  const base = (SCORE_RULES.hasOwnProperty(key) ? SCORE_RULES[key] : DEFAULT_BASE);
+
+  const now = performance.now();
+  if(now - lastPop < 900) combo = Math.min(8, combo + 1); else combo = 1;
+  lastPop = now;
+  if(comboTimer) clearTimeout(comboTimer);
+  comboTimer = setTimeout(()=>{ combo = 1; }, 2000);
+
+  const points = Math.round(base * combo);
+  score += points;
+  scoreValue.textContent = score;
+
+  if(wordEl.parentElement) wordEl.remove();
+}
+
+function startAutoSpawn(){ if(spawnTimer) clearInterval(spawnTimer); spawnTimer = setInterval(()=>{ if(autoSpawn) spawnRandomWord(); }, spawnInterval); }
+function stopAutoSpawn(){ if(spawnTimer){ clearInterval(spawnTimer); spawnTimer = null; } }
+
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space'){ e.preventDefault(); spawnRandomWord(); hideInstructions(); }
+  if(e.key.toLowerCase() === 'p'){ autoSpawn = !autoSpawn; if(!autoSpawn) stopAutoSpawn(); else startAutoSpawn(); }
+});
+document.addEventListener('click', ()=> hideInstructions(), {once:true});
+document.addEventListener('touchstart', ()=> hideInstructions(), {once:true, passive:true});
+
+function hideInstructions(){ if(!instructions.classList.contains('hidden')) instructions.classList.add('hidden'); }
+
+/* Rules button behavior + outside click to close */
+rulesBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  toggleRulesPanel();
+});
+document.addEventListener('click', (e)=>{
+  if(rulesPanel.style.display === 'block'){
+    if(!rulesPanel.contains(e.target) && e.target !== rulesBtn) {
+      rulesPanel.style.display = 'none';
+      rulesBtn.setAttribute('aria-expanded','false');
+      rulesPanel.setAttribute('aria-hidden','true');
+    }
+  }
+});
+
+/* background/weather helpers (unchanged) */
+const skyEl = document.getElementById('sky');
+const stars = document.getElementById('stars');
+const rainEl = document.getElementById('rain');
+const cloudsEl = document.getElementById('clouds');
+
+function setDayState(state){
+  skyEl.classList.remove('day','dusk','night');
+  skyEl.classList.add(state);
+  if(state === 'night') stars.classList.add('show'); else stars.classList.remove('show');
+}
+function setWeather(w){
+  if(w === 'rain'){ rainEl.classList.add('show'); populateRain(90); cloudsEl.style.opacity = 0.98; } 
+  else { rainEl.classList.remove('show'); cloudsEl.style.opacity = (w === 'cloudy'?0.9:0.25); }
+}
+function populateRain(count=80){
+  rainEl.innerHTML = '';
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  for(let i=0;i<count;i++){
+    const d = document.createElement('div');
+    d.className = 'raindrop';
+    d.style.left = Math.random()*vw + 'px';
+    d.style.top = Math.random()*-120 + 'px';
+    d.style.opacity = (0.55 + Math.random()*0.4).toFixed(2);
+    d.style.height = (10 + Math.random()*26) + 'px';
+    rainEl.appendChild(d);
+  }
+}
+function buildStars(){
+  stars.innerHTML = '';
+  for(let i=0;i<120;i++){
+    const s = document.createElement('div'); s.className='star';
+    s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*100)+'%';
+    const size=Math.random()*2+0.6; s.style.width=s.style.height=size+'px';
+    s.style.opacity=(Math.random()*0.7+0.2).toFixed(2);
+    stars.appendChild(s);
+  }
+}
+function startEnvironmentCycle(){
+  setDayState('day'); setWeather('clear');
+  let step = 0;
+  setInterval(()=>{
+    step = (step+1)%9;
+    if(step===0||step===1) setDayState('day');
+    if(step===2||step===3) setDayState('dusk');
+    if(step===4||step===5) setDayState('night');
+    if(step===6||step===7) setDayState('dusk');
+    if(step===8) setDayState('day');
+    if(Math.random()>0.6){ const w = ['clear','cloudy','rain'][Math.floor(Math.random()*3)]; setWeather(w); }
+  },9000);
+}
+
+/* start */
+buildStars();
+startEnvironmentCycle();
+startAutoSpawn();
+setTimeout(()=>{ hideInstructions(); }, 3800);
+
+/* expose helpers */
+window.spawnRandomWord = spawnRandomWord;
+window.spawnWordWithText = spawnWordWithText;
+window.resetScore = ()=>{ score=0; scoreValue.textContent='0'; combo=1; };
+
+</script>
+</body>
+</html>
