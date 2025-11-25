@@ -261,6 +261,36 @@
       }
 
       /* Page 3 Content */
+
+/* Only styling the quote paragraph in page3 */
+#page3 p {
+    font-family: 'Amiri Quran', serif;
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* English text inside that paragraph */
+#page3 p br + br + br + br + br + br,  
+#page3 p small, 
+#page3 p span,
+#page3 p {
+    font-family: 'Amiri Quran', serif;
+}
+
+/* Detect English automatically and apply English font */
+#page3 p {
+    unicode-bidi: isolate;
+}
+
+#page3 p:lang(en), 
+#page3 p *:lang(en) {
+    font-family: 'Cinzel', serif !important;
+}
+
+
+
       #page3 {
         padding: 80px 6vw;
         width: 100%;
