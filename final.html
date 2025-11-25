@@ -9,17 +9,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
 
 <style>
-
   :root{
     --bg:#ffffff;
     --arabic-color:#000000;
     --english-color:#111827;
     --accent:#d50000;
     --arrow-size:56px;
-    --arabic-base-size:6.2rem; /* base size for arabic */
-    --arabic-min-size:2.2rem;  /* minimum size when auto-scaling */
+    --arabic-base-size:6.2rem; /* default base for large screens */
+    --arabic-min-size:2.0rem;  /* absolute min when autoscaling */
     --count-size:48px;
   }
+
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
   body{
@@ -27,121 +27,121 @@
     background:var(--bg);
     color:var(--english-color);
     display:flex;align-items:center;justify-content:center;
+    -webkit-font-smoothing:antialiased;
   }
 
-/* Ayesha Home Button */
-.ayesha-home {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+  .stage{ width:100%; height:100vh; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; padding: 26px 8px; }
 
-    background: rgba(0, 0, 0, 0);       /* Transparent soft overlay */
-    backdrop-filter: blur(6px);
-    border-radius: 12px;
+  .bg-layer{ position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat; opacity:0; transition:opacity .9s ease, transform .9s ease; will-change:opacity,transform; transform:scale(1.02); z-index:0; pointer-events:none; }
+  .bg-layer.active{ opacity:1; transform:none; }
 
-    cursor: pointer;
-    z-index: 99999;
+  .bg-video{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    font-family: 'Amiri', serif;
-    font-size: 1.8rem;
-    color: #95c112;
-
-    box-shadow: 0 0 14px rgba(149,193,18,0.25);
-    transition: all 0.20s ease;
+ .card{
+  width:100%;
+  max-width:540px;
+  padding:36px 20px;
+  text-align:center;
+  transition:transform .6s cubic-bezier(.2,.9,.3,1),opacity .6s ease,background .36s ease,backdrop-filter .36s ease;
+  position:relative; z-index:2;
+  background: #ffffff;    /* fully opaque white */
+  border-radius:0;        /* remove rounding for a full-bleed panel */
+  color:var(--english-color);
+  box-shadow: none;       /* explicit — ensure no shadow */
 }
 
-.ayesha-home:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 18px rgba(149, 193, 18, 0);
-}
-
-.ayesha-home i {
-    font-size: 1.6rem;
-    color: #95c112;
-}
-
-
-  .stage{
-    width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
-  }
-
-  .bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .9s ease, transform .9s ease;will-change:opacity,transform;transform:scale(1.02);z-index:0;pointer-events:none;}
-  .bg-layer.active{opacity:1;transform:none;}
-
-  .bg-video{width:100%;height:100%;object-fit:cover;display:block;}
-
-  .card{
-    max-width:900px;padding:40px 28px;text-align:center;transition:transform .9s cubic-bezier(.2,.9,.3,1),opacity .9s ease,background .36s ease,backdrop-filter .36s ease;backface-visibility:hidden;
-    position:relative;z-index:2;background: rgba(255,255,255,0.55);backdrop-filter: blur(6px);border-radius:12px;color:var(--english-color);
-  }
 
   .card.clear-bg{ background: rgba(255,255,255,0.12); backdrop-filter:none; text-shadow:0 1px 0 rgba(255,255,255,0.02); }
 
-  .line{ opacity:0; transform:translateY(12px); transition:opacity .9s ease,transform .9s cubic-bezier(.2,.9,.3,1); }
+  .line{ opacity:0; transform:translateY(8px); transition:opacity .5s ease,transform .6s cubic-bezier(.2,.9,.3,1); }
   .line.show{ opacity:1; transform:translateY(0); }
 
-  /* Arabic styling */
+  /* Arabic styling - use clamp so it behaves on all viewports */
   .arabic{
     font-family:'Amiri', serif;
-    font-size:var(--arabic-base-size);
-    line-height:1;letter-spacing:0.02em;color:var(--arabic-color);
-    margin:0 0 18px 0;text-align:center;direction:rtl;word-break:keep-all;
+    font-size: clamp(2.6rem, 6.6vw, 6.2rem); /* responsive default */
+    line-height:1.02;
+    letter-spacing:0.02em;
+    color:var(--arabic-color);
+    margin:0 0 14px 0;
+    text-align:center;
+    direction:rtl;
+    word-break:normal; /* avoid weird mid-word breaks for Arabic */
   }
+
+  /* per-slide explicit smaller classes (only applied at runtime) */
+  .arabic.slide-0 { font-size: clamp(2.2rem, 5.5vw, 3.8rem) !important; }
+  .arabic.slide-1 { font-size: clamp(2.0rem, 5.1vw, 3.6rem) !important; }
+
+  /* When we want a single visual line, use this class (we hide <br>) */
   .arabic.single-line{ white-space:nowrap; overflow:visible; display:inline-block; max-width:100%; }
+  .arabic.single-line br{ display:none; }
+
   .arabic.small-lines{ font-size:3.2rem; text-align:center; display:block; white-space:normal; }
 
-  .english{ font-size:1.25rem;color:var(--english-color);margin-top:20px;opacity:.95 }
-  .muted{opacity:.7;font-size:0.98rem}
+  /* English responsive sizes (keeps lines readable, prevents overflow) */
+  .english{
+    font-size: clamp(0.95rem, 2.6vw, 1.25rem);
+    color:var(--english-color);
+    margin-top:16px;
+    opacity:.95;
+    text-align:center;
+    line-height:1.15;
+    word-break:normal;
+  }
 
-  .fade-out{opacity:0;transform:scale(.98) translateY(6px)}
-  .fade-in{opacity:1;transform:none}
-
-  .sound-btn{ position:fixed; right:22px; bottom:22px; background:transparent; border:0; padding:10px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,0.08); cursor:pointer; display:flex; align-items:center; gap:8px; opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .36s ease,transform .36s ease; color:#fff; z-index:5; }
-  .sound-btn.show{ opacity:1; pointer-events:auto; transform:none; background:rgba(255,255,255,0.9); border:1px solid rgba(0,0,0,0.06) }
-  .sound-icon{ width:22px;height:22px;display:inline-block }
-
-  .next-arrow{ position:fixed; right:18px; top:50%; transform:translateY(-50%); width:var(--arrow-size); height:var(--arrow-size); display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:0; cursor:pointer; z-index:5; transition:transform .18s ease,opacity .18s ease; opacity:.95; pointer-events:auto; }
-  .next-arrow:hover{ transform:translateY(-50%) scale(1.06); }
-  .next-arrow svg{ width:28px; height:28px; display:block; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.2)); }
-  @media (max-width:480px){ :root{--arrow-size:46px} .next-arrow{ right:12px } }
-
-  /* countdown timer in top-right */
-  .countdown{
-    position:fixed;
-    right:22px;
-    top:18px;
-    width:var(--count-size);
-    height:var(--count-size);
-    border-radius:999px;
-    background: rgba(0,0,0,0.45);
-    color: #fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  /* make the romanized highlight a single unbroken inline element */
+  .roz-toggle{
+    display:inline-block;
+    white-space:nowrap;           /* prevents Roz-e-Qayamat splitting across lines */
+    line-height:1;
     font-weight:700;
-    z-index:6;
-    pointer-events:none;
-    font-family: 'Playfair Display', serif;
-    box-shadow:0 6px 18px rgba(0,0,0,0.22);
-    transition:opacity .2s ease, transform .18s ease;
+    color: var(--accent);
+    /* responsive size a little bigger to stand out but bounded */
+    font-size: clamp(1.3rem, 5.0vw, 2.2rem);
+    letter-spacing:0.02em;
+  }
+
+  /* optional style for romanized word when not a span */
+  .english .roz-inline { white-space:nowrap; display:inline-block; }
+
+  .muted{ opacity:.7; font-size:0.98rem; }
+
+  .fade-out{ opacity:0; transform:scale(.98) translateY(6px) }
+
+  .sound-btn{ position:fixed; right:12px; bottom:12px; background:transparent; border:0; padding:8px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,0.08); cursor:pointer; display:flex; align-items:center; gap:8px; opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .36s ease,transform .36s ease; color:#111; z-index:50; }
+  .sound-btn.show{ opacity:1; pointer-events:auto; transform:none; background:rgba(255,255,255,0.98); border:1px solid rgba(0,0,0,0.04) }
+
+  .next-arrow{ position:fixed; right:12px; top:50%; transform:translateY(-50%); width:var(--arrow-size); height:var(--arrow-size); display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:0; cursor:pointer; z-index:50; transition:transform .18s ease,opacity .18s ease; opacity:.95; pointer-events:auto; }
+  .next-arrow svg{ width:26px; height:26px; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.18)); }
+  @media (max-width:480px){ :root{ --arrow-size:46px } .next-arrow{ right:8px } }
+
+  .countdown{
+    position:fixed; right:12px; top:12px; width:var(--count-size); height:var(--count-size); border-radius:999px; background: rgba(0,0,0,0.45); color: #fff; display:flex; align-items:center; justify-content:center; font-weight:700; z-index:60; pointer-events:none; font-family:'Playfair Display', serif; box-shadow:0 6px 18px rgba(0,0,0,0.18); transition:opacity .2s ease, transform .18s ease;
   }
   .countdown.hidden{ opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; }
   .countdown .sec{ font-size:1.05rem; line-height:1; }
 
-  @media (max-width:480px){ .countdown{ width:40px;height:40px; font-size:0.95rem } .countdown .sec{ font-size:0.95rem } }
+  @media (max-width:420px){
+    :root{ --arabic-base-size:4.2rem; --arabic-min-size:1.8rem; }
+    .card{ padding:18px 14px; border-radius:10px; max-width:420px; }
+    .arabic{ font-size: clamp(1.8rem, 8.5vw, 3.4rem); }
+    .arabic.slide-0 { font-size: clamp(1.6rem, 6.4vw, 3.0rem) !important; }
+    .arabic.slide-1 { font-size: clamp(1.5rem, 6.0vw, 2.8rem) !important; }
+    .english{ font-size: clamp(0.9rem,2.8vw,1.05rem) }
+    .roz-toggle{ font-size: clamp(1.1rem,4.2vw,1.8rem) }
+    .stage{ padding: 18px 8px; }
+  }
 
-  @media (max-width:480px){ .card{ padding:22px; border-radius:8px } .english{ font-size:1rem } }
+  /* keep text inside card from overflowing horizontally */
+  .card { overflow-wrap: anywhere; word-break: break-word; -webkit-font-smoothing:antialiased; }
+
 </style>
 </head>
 <body>
    <!-- Ayesha Home Redirect Component -->
-<div class="ayesha-home" onclick="goHome()">
-    <i class="ri-home-4-fill"></i>
-    <span>عائشة</span>
+<div class="ayesha-home" onclick="goHome()" aria-label="Go home" role="button" tabindex="0" style="position:fixed;top:14px;left:14px;z-index:80;background:transparent;padding:6px 10px;border-radius:10px;">
+    <span style="font-family:'Amiri', serif;color:#95c112;font-size:1.05rem;padding:4px 6px;border-radius:8px;background:rgba(149,193,18,0.06);box-shadow:0 4px 10px rgba(149,193,18,0.06);">عائشة</span>
 </div>
 
 <div class="stage" role="main" aria-live="polite">
@@ -153,18 +153,19 @@
     <video id="bg-video-1" class="bg-video" src="video2.mp4" muted playsinline loop preload="auto"></video>
   </div>
 
-<div id="bg-2" class="bg-layer" aria-hidden="true">
-  <img src="Assests/image3.png" alt="" style="width:auto; height:90vh; max-width:90%; object-fit:contain; display:block; margin:0 auto;"/>
-</div>
+  <div id="bg-2" class="bg-layer" aria-hidden="true">
+    <img src="Assests/image3.png" alt="" style="width:auto; height:90vh; max-width:90%; object-fit:contain; display:block; margin:0 auto;"/>
+  </div>
+
   <div class="card" id="card" aria-hidden="false">
-    <div id="text-slot"></div>
+    <div id="text-slot" aria-live="polite"></div>
   </div>
 
   <div id="countdown" class="countdown" aria-hidden="false"><span class="sec">6</span></div>
 
   <button id="nextBtn" class="next-arrow" aria-label="Next" title="Next (or wait auto)">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8 5l7 7-7 7" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 5l7 7-7 7" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
 
@@ -181,11 +182,7 @@
 </div>
 
 <script>
-
-function goHome() {
-    window.location.href = "index.html";  // redirect to main page
-}
-
+function goHome() { window.location.href = "index.html"; }
 
 /* content */
 const pieces = [
@@ -197,13 +194,14 @@ const pieces = [
   },
   {
     type:'arabic-multi',
-    arabic:`كُلُّ مَنْ عَلَيْهَا فَانٍ<br>وَيَبْقَىٰ وَجْهُ رَبِّكَ ذُو الْجَلَالِ وَالْإِكْرَامِ<small></small>`,
+    arabic:`كُلُّ مَنْ عَلَيْهَا فَانٍ<br>وَيَبْقَىٰ وَجْهُ رَبِّكَ ذُو الْجَلَالِ وَالْإِكْرَامِ`,
     english:`فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ`,
     audio: 'audio2.mp3'
   },
   {
     type:'both',
-    arabic:`Tum mujhse <br>Roz-e-Qayamat me milna`,
+    // three lines: Tum mujhse (1), Roz-e-Qayamat (2), me milna (3)
+    arabic:`Tum mujhse<br>Roz-e-Qayamat<br>me milna`,
     english:`Tumse mera <b>Hisab Baki hai</b>`,
     highlight:{word:'Roz-e-Qayamat', color:'var(--accent)'}
   }
@@ -245,14 +243,15 @@ function activateBackground(i){
   });
 }
 
-/* fit an element to one line by reducing font-size until it fits width or min reached */
+/* fit an element to one line by reducing font-size until it fits width or min reached
+   NOTE: this function is used only when we intentionally want a single visual line */
 function fitOneLine(el){
   const style = window.getComputedStyle(el);
   let fs = parseFloat(style.fontSize);
-  const minPx = parseFloat(convertRemToPx(getComputedStyle(document.documentElement).getPropertyValue('--arabic-min-size') || '2.2rem') || 22);
+  const minPx = parseFloat(convertRemToPx(getComputedStyle(document.documentElement).getPropertyValue('--arabic-min-size') || '2.0rem') || 18);
   el.style.whiteSpace = 'nowrap';
   el.style.display = 'inline-block';
-  const containerWidth = card.clientWidth - 48;
+  const containerWidth = Math.max( (card.clientWidth - 48), 64 );
   while(el.scrollWidth > containerWidth && fs > minPx){
     fs = Math.max(minPx, fs - 1);
     el.style.fontSize = fs + 'px';
@@ -271,6 +270,81 @@ function convertRemToPx(remString){
   return parseFloat(remString);
 }
 
+/* --- Highlight toggle helper: toggles Roz-e-Qayamat <-> روزِ قیامت while hovered/touched --- */
+function attachToggleToHighlights(containerRoot) {
+  const root = containerRoot || document;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+    acceptNode(node) {
+      if (!node.textContent) return NodeFilter.FILTER_REJECT;
+      if (node.textContent.includes('Roz-e-Qayamat')) return NodeFilter.FILTER_ACCEPT;
+      return NodeFilter.FILTER_REJECT;
+    }
+  });
+
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+
+  nodes.forEach(el => {
+    if (el.querySelector && el.querySelector('.roz-toggle')) return;
+    const html = el.innerHTML;
+    const replacedHtml = html.replace(/Roz-e-Qayamat/, '<span class="roz-toggle" role="button" tabindex="0">Roz-e-Qayamat</span>');
+    if (replacedHtml !== html) el.innerHTML = replacedHtml;
+  });
+
+  const toggles = root.querySelectorAll('.roz-toggle');
+  toggles.forEach(span => {
+    if (span.__roz_toggle_attached) return;
+    span.__roz_toggle_attached = true;
+
+    const ROMAN = 'Roz-e-Qayamat';
+    const URDU  = 'روزِ قیامت';
+    const INTERVAL_MS = 3000; // 3 seconds
+
+    let intervalId = null;
+    let showingUrdu = false;
+
+    function setToRoman(){ span.textContent = ROMAN; showingUrdu = false; }
+    function setToUrdu(){ span.textContent = URDU; showingUrdu = true; }
+
+    function startLoopAndShowUrdu(){
+      setToUrdu();
+      if(intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => { showingUrdu ? setToRoman() : setToUrdu(); }, INTERVAL_MS);
+      span.__roz_interval = intervalId;
+    }
+    function stopLoopAndReset(){
+      if(span.__roz_interval){ clearInterval(span.__roz_interval); span.__roz_interval = null; }
+      setToRoman();
+    }
+
+    span.addEventListener('mouseenter', startLoopAndShowUrdu);
+    span.addEventListener('mouseleave', stopLoopAndReset);
+
+    span.addEventListener('keydown', (e) => {
+      if(e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if(span.__roz_interval) stopLoopAndReset(); else startLoopAndShowUrdu(); }
+    });
+
+    span.addEventListener('touchstart', (e) => { e.stopPropagation(); startLoopAndShowUrdu(); }, { passive: true });
+    span.addEventListener('touchend', (e) => { setTimeout(stopLoopAndReset, 3200); });
+
+    const observer = new MutationObserver(() => {
+      if(!document.body.contains(span)){
+        if(span.__roz_interval) clearInterval(span.__roz_interval);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+}
+
+/* configuration for which slides force single-line */
+const FORCE_SINGLE_CONFIG = {
+  0: { arabicSingle: true, englishSingle: true },  // slide 0 remains single-line for both
+  1: { arabicSingle: false, englishSingle: false }, // slide 1 should honor its <br> (two lines)
+  2: { arabicSingle: false, englishSingle: false }  // slide 2 uses explicit <br> layout (three lines)
+};
+
 function renderPiece(i){
   const p = pieces[i];
   activateBackground(i);
@@ -281,6 +355,11 @@ function renderPiece(i){
   const arab = document.createElement('div');
   arab.className = 'arabic line';
 
+  // apply slide-based reduction only for slide 0 and slide 1
+  if (i === 0) arab.classList.add('slide-0');
+  if (i === 1) arab.classList.add('slide-1');
+
+  // fill arabic/romanized content without changing strings
   if(p.type === 'arabic-multi'){
     arab.classList.add('small-lines');
     arab.innerHTML = p.arabic;
@@ -304,29 +383,58 @@ function renderPiece(i){
   slot.appendChild(arab);
   if(p.english) slot.appendChild(eng);
 
+  // configure single-line behavior from config
+  const conf = FORCE_SINGLE_CONFIG[i] || { arabicSingle: false, englishSingle: false };
+
   void arab.offsetWidth;
   setTimeout(()=>{
-    if(i === 0){
+    // reset
+    arab.classList.remove('single-line');
+    eng.classList.remove('single-line');
+    arab.style.fontSize = '';
+    eng.style.fontSize = '';
+
+    if(conf.arabicSingle){
       arab.classList.add('single-line');
       const baseRem = getComputedStyle(document.documentElement).getPropertyValue('--arabic-base-size') || '6.2rem';
       arab.style.fontSize = baseRem.trim();
       requestAnimationFrame(()=>fitOneLine(arab));
-      // re-fit on resize
-      window.addEventListener('resize', () => {
-        arab.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--arabic-base-size') || '6.2rem';
-        fitOneLine(arab);
-      });
+      let resizeTO;
+      function onResizeFit(){
+        clearTimeout(resizeTO);
+        resizeTO = setTimeout(()=>{ arab.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--arabic-base-size') || '6.2rem'; fitOneLine(arab); }, 120);
+      }
+      window.addEventListener('resize', onResizeFit);
     } else {
       arab.classList.remove('single-line');
       arab.style.whiteSpace = '';
       arab.style.fontSize = '';
     }
 
+    if(conf.englishSingle && eng){
+      eng.classList.add('single-line');
+      requestAnimationFrame(()=>fitOneLine(eng));
+      let resizeTO2;
+      function onResizeFitEnglish(){ clearTimeout(resizeTO2); resizeTO2 = setTimeout(()=>{ fitOneLine(eng); }, 120); }
+      window.addEventListener('resize', onResizeFitEnglish);
+    } else {
+      eng.classList.remove('single-line');
+      eng.style.whiteSpace = '';
+      eng.style.fontSize = '';
+    }
+
+    // reveal
     arab.classList.add('show');
     if(p.english) eng.classList.add('show');
+
+    // ensure Roz-e-Qayamat appears as a single unbroken item and attach toggle
+    attachToggleToHighlights(card);
+
+    // If the romanized word exists but was split by the highlight replacement,
+    // ensure its parent has no fallback wrapping: make any .roz-toggle inline-block (CSS already covers)
   },50);
 
-  // autoplay per-slide audio for slides 0 and 1 if available
+  // audio
   try{ stopSlideAudio(); }catch(e){}
   if(p.audio && i !== pieces.length - 1){
     slideAudio.src = p.audio;
@@ -335,114 +443,61 @@ function renderPiece(i){
     if(playPromise && playPromise.catch) playPromise.catch(()=>{ /* autoplay may be blocked */ });
   }
 
-  // arrow visible on all slides
   nextBtn.style.display = 'flex';
 
-  // final slide shows sound control and stops auto (handled elsewhere)
   if(i === pieces.length - 1){
     soundBtn.classList.add('show');
     soundBtn.setAttribute('aria-hidden','false');
-    hideCountdown(); // hide countdown at final
+    hideCountdown();
   } else {
     soundBtn.classList.remove('show');
     soundBtn.setAttribute('aria-hidden','true');
-    showCountdown(); // ensure countdown visible
+    showCountdown();
   }
 }
 
-/* slide audio helpers */
 function stopSlideAudio(){ try{ if(!slideAudio.paused) slideAudio.pause(); }catch(e){} }
 
-/* Auto scheduling using single timeout + per-second countdown */
+/* Auto scheduling with countdown */
 function startAuto(){
   stopAuto();
-  if(idx >= pieces.length - 1) return; // don't start if on final
+  if(idx >= pieces.length - 1) return;
   countdownRemaining = Math.ceil(AUTO_INTERVAL/1000);
   updateCountdownUI(countdownRemaining);
-  // Start per-second countdown
   countdownIntervalID = setInterval(()=>{
     countdownRemaining = Math.max(0, countdownRemaining - 1);
     updateCountdownUI(countdownRemaining);
-    if(countdownRemaining <= 0){
-      // Let the timeout handler perform the transition; ensure sync by clearing interval
-      clearInterval(countdownIntervalID);
-      countdownIntervalID = null;
-    }
-  }, 1000);
+    if(countdownRemaining <= 0){ clearInterval(countdownIntervalID); countdownIntervalID = null; }
+  },1000);
 
   autoTimeoutID = setTimeout(()=>{
-    // transition to next slide (if not final)
-    if(idx < pieces.length - 1){
-      goTo(idx + 1);
-    } else {
-      stopAuto();
-    }
+    if(idx < pieces.length - 1) goTo(idx + 1); else stopAuto();
   }, AUTO_INTERVAL);
 }
 
-function stopAuto(){
-  if(autoTimeoutID){ clearTimeout(autoTimeoutID); autoTimeoutID = null; }
-  if(countdownIntervalID){ clearInterval(countdownIntervalID); countdownIntervalID = null; }
-}
+function stopAuto(){ if(autoTimeoutID){ clearTimeout(autoTimeoutID); autoTimeoutID = null; } if(countdownIntervalID){ clearInterval(countdownIntervalID); countdownIntervalID = null; } }
+function resetAuto(){ stopAuto(); if(idx < pieces.length - 1) startAuto(); }
+function updateCountdownUI(sec){ if(idx === pieces.length - 1){ countdownEl.classList.add('hidden'); countdownEl.setAttribute('aria-hidden','true'); return; } countdownEl.classList.remove('hidden'); countdownEl.setAttribute('aria-hidden','false'); countdownSecEl.textContent = String(sec); }
+function hideCountdown(){ countdownEl.classList.add('hidden'); countdownEl.setAttribute('aria-hidden','true'); }
+function showCountdown(){ countdownEl.classList.remove('hidden'); countdownEl.setAttribute('aria-hidden','false'); }
 
-function resetAuto(){
-  stopAuto();
-  // restart only if not on final slide
-  if(idx < pieces.length - 1) startAuto();
-}
-
-function updateCountdownUI(sec){
-  if(idx === pieces.length - 1){
-    countdownEl.classList.add('hidden');
-    countdownEl.setAttribute('aria-hidden','true');
-    return;
-  }
-  countdownEl.classList.remove('hidden');
-  countdownEl.setAttribute('aria-hidden','false');
-  countdownSecEl.textContent = String(sec);
-}
-
-function hideCountdown(){
-  countdownEl.classList.add('hidden');
-  countdownEl.setAttribute('aria-hidden','true');
-}
-function showCountdown(){
-  countdownEl.classList.remove('hidden');
-  countdownEl.setAttribute('aria-hidden','false');
-}
-
-/* slide changing */
 function goTo(index){
-  // fade out current lines
   const lines = slot.querySelectorAll('.line');
   lines.forEach(l=>{ l.classList.remove('show'); l.classList.add('fade-out'); });
   setTimeout(()=>{
     lines.forEach(l=>l.remove());
     idx = Math.min(index, pieces.length - 1);
     renderPiece(idx);
-    if(idx === pieces.length - 1){
-      stopAuto();
-      stopSlideAudio();
-      try{ hairat.pause(); }catch(e){}
-    } else {
-      resetAuto();
-    }
-  },900);
+    if(idx === pieces.length - 1){ stopAuto(); stopSlideAudio(); try{ hairat.pause(); }catch(e){} } else { resetAuto(); }
+  },540);
 }
 
-/* arrow and accessibility */
+/* UI handlers */
 nextBtn.addEventListener('click', ()=>{
-  if(idx < pieces.length - 1){
-    // manual advance: cancel auto then goTo and restart
-    stopAuto();
-    goTo(idx + 1);
-  } else {
-    // on last slide, clicking arrow does nothing (per current behaviour)
-  }
+  if(idx < pieces.length - 1){ stopAuto(); goTo(idx + 1); }
 });
 nextBtn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); nextBtn.click(); } });
 
-/* sound button */
 soundBtn.addEventListener('click', ()=>{
   if(hairat.paused){ hairat.currentTime = 0; const p = hairat.play(); if(p && p.catch) p.catch(()=>{}); soundBtn.querySelector('#soundLabel').textContent = 'Playing'; }
   else { hairat.pause(); soundBtn.querySelector('#soundLabel').textContent = 'Play sound'; }
@@ -457,7 +512,7 @@ startAuto();
 /* pause non-active videos */
 bgVideos.forEach((v,i)=>{ if(v && i !== 0) try{ v.pause(); }catch(e){} });
 
-/* fallback: if only one piece, hide countdown and show sound */
+/* fallback single piece */
 if(pieces.length === 1){ nextBtn.style.display = 'flex'; soundBtn.classList.add('show'); soundBtn.setAttribute('aria-hidden','false'); hideCountdown(); }
 
 </script>
